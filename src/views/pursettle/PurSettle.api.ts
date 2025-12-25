@@ -12,7 +12,14 @@ enum Api {
   importExcel = '/pursettle/purSettle/importExcel',
   exportXls = '/pursettle/purSettle/exportXls',
   purSettleDetailList = '/pursettle/purSettle/queryPurSettleDetailByMainId',
+  purSettleDetailListByIds= '/pursettle/purSettle/queryPurSettleDetailByTargetId',
+  audit = '/pursettle/purSettle/audit',
 }
+/**
+ * 审核/反审URL
+ * @param params
+ */
+export const getAuditUrl = Api.audit;
 /**
  * 导出api
  * @param params
@@ -28,6 +35,11 @@ export const getImportUrl = Api.importExcel;
  * @param params
  */
 export const purSettleDetailList = Api.purSettleDetailList;
+/**
+ * 查询子表数据
+ * @param params
+ */
+export const purSettleDetailListByIds = Api.purSettleDetailListByIds;
 /**
  * 列表接口
  * @param params

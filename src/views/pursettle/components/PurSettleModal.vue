@@ -1,6 +1,6 @@
 <template>
-  <BasicModal v-bind="$attrs" @register="registerModal" destroyOnClose :title="title" :width="896" @ok="handleSubmit">
-      <BasicForm @register="registerForm" ref="formRef"/>
+  <BasicModal v-bind="$attrs" @register="registerModal" destroyOnClose :title="title" :width="1200" @ok="handleSubmit">
+      <BasicForm @register="registerForm" ref="formRef" @valuesChange="handleFormChange"/>
   <!-- 子表单区域 -->
     <a-tabs v-model:activeKey="activeKey" animated @change="handleChangeTabs">
       <a-tab-pane tab="采购结算_明细" key="purSettleDetail" :forceRender="true">
@@ -16,6 +16,7 @@
           :rowSelection="true"
           :disabled="formDisabled"
           :toolbar="true"
+          @valueChange="handleValueChange"
           />
       </a-tab-pane>
     </a-tabs>
@@ -29,8 +30,7 @@
     import { JVxeTable } from '/@/components/jeecg/JVxeTable'
     import { useJvxeMethod } from '/@/hooks/system/useJvxeMethods.ts'
     import {formSchema,purSettleDetailColumns} from '../PurSettle.data';
-    import {saveOrUpdate,purSettleDetailList} from '../PurSettle.api';
-    import { VALIDATE_FAILED } from '/@/utils/common/vxeUtils'
+    import {saveOrUpdate, purSettleDetailList, purSettleDetailListByIds} from '../PurSettle.api';
     // Emits声明
     const emit = defineEmits(['register','success']);
     const isUpdate = ref(true);
@@ -99,6 +99,65 @@
         } finally {
             setModalProps({confirmLoading: false});
         }
+    }
+
+
+    // 监听 form valuesChange
+    function handleFormChange(changedValues, allValues) {
+      console.log('changed:', changedValues);
+      console.log('allValues：',allValues)
+      if (changedValues.supplierCode !== undefined) {
+        const supplier = changedValues.supplierCode;
+        // 找到 orderCode 字段对应的表单控件，更新 param
+        setProps({
+          schemas: formSchema.map((s) => {
+            if (s.field === 'receiveCodes') {
+              return {
+                ...s,
+                componentProps: ({ formActionType }) => {
+                  const { setFieldsValue } = formActionType;
+                  return {
+                    setFieldsValue: setFieldsValue,
+                    code: "report_pur_receive",
+                    fieldConfig: [
+                      { source: 'doc_code', target: 'receiveCodes' },
+                      { source: 'main_id', target: 'receiveIds' },
+                      { source: 'detail_id', target: 'receiveDetailIds' },
+                    ],
+                    multi: true,
+                    // 动态 param，使用最新 supplierCode
+                    param: { supplier_code: supplier ? `'${supplier}'` : "''" }
+                  };
+                },
+              };
+            }
+            return s;
+          }),
+        });
+      }
+
+      if (changedValues.receiveIds !== undefined) {
+
+
+        // 用户真正修改 → 必定触发
+        requestSubTableData(
+          purSettleDetailListByIds,
+          { id: changedValues.receiveDetailIds },
+          purSettleDetailTable
+        );
+      }
+    }
+    function handleValueChange({ row, column, value }) {
+
+      if ((column.key === 'settleNum'||column.key === 'settleUnitPrice') && value) {
+        row.settleAmount = (Number(row.settleNum) || 0) * (Number(row.settleUnitPrice) || 0);
+        row.settleDifferAmount =
+          Math.round(
+            ((Number(row.settleAmount) || 0) - (Number(row.receiveAmount) || 0)) * 100
+          ) / 100;
+
+
+      }
     }
 </script>
 
