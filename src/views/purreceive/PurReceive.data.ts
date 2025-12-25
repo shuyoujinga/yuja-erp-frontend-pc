@@ -228,7 +228,8 @@ export const purReceiveDetailColumns: JVxeColumn[] = [
       width:"200px",
       placeholder: '请输入${title}',
       defaultValue:'',
-      disabled:true
+      disabled:true,
+      validateRules: [{ required: true, message: '${title}不能为空' }],
     },
     {
       title: '规格',
