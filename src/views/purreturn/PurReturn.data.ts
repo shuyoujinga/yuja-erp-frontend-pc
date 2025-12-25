@@ -18,54 +18,57 @@ export const columns: BasicColumn[] = [
       return !text?"":(text.length>10?text.substr(0,10):text)
     },
    },
+  {
+    title: '所属部门',
+    align: "center",
+    dataIndex: 'sysOrgCode_dictText'
+  },
    {
     title: '供应商',
     align:"center",
     dataIndex: 'supplierCode_dictText'
    },
-   {
-    title: '审核状态',
+
+  {
+    title: '状态',
     align:"center",
-    dataIndex: 'audit_dictText'
-   },
-   {
-    title: '审核人',
-    align:"center",
-    dataIndex: 'auditBy'
-   },
-   {
-    title: '审核时间',
-    align:"center",
-    dataIndex: 'auditTime',
-    customRender:({text}) =>{
-      return !text?"":(text.length>10?text.substr(0,10):text)
-    },
-   },
-   {
+    dataIndex: 'status_dictText'
+  },
+
+  {
     title: '退货类型',
     align:"center",
-    dataIndex: 'returnType'
+    dataIndex: 'returnType_dictText'
    },
    {
     title: '退货金额',
     align:"center",
     dataIndex: 'amount'
    },
-   {
-    title: '状态',
-    align:"center",
-    dataIndex: 'status'
-   },
-   {
-    title: '采购订单_ids',
-    align:"center",
-    dataIndex: 'orderIds'
-   },
+
    {
     title: '采购订单',
     align:"center",
     dataIndex: 'orderCodes'
    },
+  {
+    title: '审核状态',
+    align:"center",
+    dataIndex: 'audit_dictText'
+  },
+  {
+    title: '审核人',
+    align:"center",
+    dataIndex: 'auditBy'
+  },
+  {
+    title: '审核时间',
+    align:"center",
+    dataIndex: 'auditTime',
+    customRender:({text}) =>{
+      return !text?"":(text.length>10?text.substr(0,10):text)
+    },
+  },
    {
     title: '备注',
     align:"center",

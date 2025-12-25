@@ -28,10 +28,16 @@ export const columns: BasicColumn[] = [
     },
   },
   {
+    title: '所属部门',
+    align: "center",
+    dataIndex: 'sysOrgCode_dictText'
+  },
+  {
     title: '供应商',
     align: "center",
     dataIndex: 'supplierCode_dictText'
   },
+
   {
     title: '收货单号',
     align: "center",

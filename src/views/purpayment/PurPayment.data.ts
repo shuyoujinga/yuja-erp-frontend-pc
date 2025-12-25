@@ -28,6 +28,11 @@ export const columns: BasicColumn[] = [
     },
   },
   {
+    title: '所属部门',
+    align: "center",
+    dataIndex: 'sysOrgCode_dictText'
+  },
+  {
     title: '结算单号',
     align: "center",
     dataIndex: 'settleCodes'
@@ -37,6 +42,7 @@ export const columns: BasicColumn[] = [
     align: "center",
     dataIndex: 'supplierCode_dictText'
   },
+
   {
     title: '状态',
     align: "center",
