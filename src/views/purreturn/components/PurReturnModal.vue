@@ -1,6 +1,6 @@
 <template>
-  <BasicModal v-bind="$attrs" @register="registerModal" destroyOnClose :title="title" :width="896" @ok="handleSubmit">
-      <BasicForm @register="registerForm" ref="formRef"/>
+  <BasicModal v-bind="$attrs" @register="registerModal" destroyOnClose :title="title" :width="1200" @ok="handleSubmit">
+      <BasicForm @register="registerForm" @valuesChange="handleFormChange" ref="formRef"/>
   <!-- 子表单区域 -->
     <a-tabs v-model:activeKey="activeKey" animated @change="handleChangeTabs">
       <a-tab-pane tab="采购退货_明细" key="purReturnDetail" :forceRender="true">
@@ -29,8 +29,12 @@
     import { JVxeTable } from '/@/components/jeecg/JVxeTable'
     import { useJvxeMethod } from '/@/hooks/system/useJvxeMethods.ts'
     import {formSchema,purReturnDetailColumns} from '../PurReturn.data';
-    import {saveOrUpdate,purReturnDetailList} from '../PurReturn.api';
-    import { VALIDATE_FAILED } from '/@/utils/common/vxeUtils'
+    import {
+      saveOrUpdate,
+      purReturnDetailList,
+      purReturnDetailListByIds,
+      getSmartRemark
+    } from '../PurReturn.api';
     // Emits声明
     const emit = defineEmits(['register','success']);
     const isUpdate = ref(true);
@@ -99,6 +103,61 @@
         } finally {
             setModalProps({confirmLoading: false});
         }
+    }
+
+    // 监听 form valuesChange
+    function handleFormChange(changedValues, allValues) {
+      console.log('changed:', changedValues);
+      console.log('allValues：',allValues)
+      if (changedValues.supplierCode !== undefined) {
+        const supplier = changedValues.supplierCode;
+        // 找到 orderCode 字段对应的表单控件，更新 param
+        setProps({
+          schemas: formSchema.map((s) => {
+            if (s.field === 'orderCodes') {
+              return {
+                ...s,
+                componentProps: ({ formActionType }) => {
+                  const { setFieldsValue } = formActionType;
+                  return {
+                    setFieldsValue: setFieldsValue,
+                    code: "report_pur_order",
+                    fieldConfig: [
+                      { source: 'doc_code', target: 'orderCodes' },
+                      { source: 'main_id', target: 'orderIds' },
+                      { source: 'detail_id', target: 'orderDetailId' }
+                    ],
+                    multi: true,
+                    // 动态 param，使用最新 supplierCode
+                    param: { supplier_code: supplier ? `'${supplier}'` : "''" }
+                  };
+                },
+              };
+            }
+            return s;
+          }),
+        });
+      }
+
+      if (changedValues.orderDetailId !== undefined) {
+
+        // 调智能备注接口
+        getSmartRemark({
+          orderDetailId: changedValues.orderDetailId,
+          supplierCode: allValues.supplierCode,
+        }).then((remark) => {
+          formRef.value.setFieldsValue({
+            remark: remark,
+          });
+        });
+
+        // 用户真正修改 → 必定触发
+        requestSubTableData(
+          purReturnDetailListByIds,
+          { id: changedValues.orderDetailId },
+          purReturnDetailTable
+        );
+      }
     }
 </script>
 

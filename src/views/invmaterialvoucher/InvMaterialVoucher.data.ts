@@ -1,7 +1,5 @@
 import {BasicColumn} from '/@/components/Table';
 import {FormSchema} from '/@/components/Table';
-import { rules} from '/@/utils/helper/validator';
-import { render } from '/@/utils/common/renderUtils';
 import {JVxeTypes,JVxeColumn} from '/@/components/jeecg/JVxeTable/types'
 import {h} from "vue";
 //列表数据
@@ -180,7 +178,7 @@ export const searchFormSchema: FormSchema[] = [
 	{
       label: "主移动类型",
       field: "moveType",
-      component: 'JDictSelectTag',
+      component: 'JSearchSelect',
       componentProps:{
       },
       //colProps: {span: 6},
@@ -239,16 +237,16 @@ export const formSchema: FormSchema[] = [
   },
   {
     label: '来源单据号',
-    field: 'soureDocCode',
+    field: 'sourceDocCode',
     component: 'Input',
     dynamicDisabled:true
   },
   {
     label: '主移动类型',
     field: 'moveType',
-    component: 'JDictSelectTag',
+    component: 'JSearchSelect',
     componentProps:{
-        dictCode:""
+        dict:"inv_move_type,move_desc,move_type"
      },
     dynamicDisabled:true
   },
@@ -285,18 +283,10 @@ export const formSchema: FormSchema[] = [
 //子表表格配置
 export const invMaterialVoucherDetailColumns: JVxeColumn[] = [
     {
-      title: '来源单据明细ID',
-      key: 'sourceDocDetailId',
-      type: JVxeTypes.input,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
-    {
       title: '行号',
       key: 'lineNo',
       type: JVxeTypes.inputNumber,
-      width:"200px",
+      width:"50px",
       placeholder: '请输入${title}',
       defaultValue:'',
     },
@@ -304,16 +294,8 @@ export const invMaterialVoucherDetailColumns: JVxeColumn[] = [
       title: '物料',
       key: 'materialCode',
       type: JVxeTypes.selectSearch,
-      dictCode:"",
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
-    {
-      title: '物料名称',
-      key: 'materialName',
-      type: JVxeTypes.input,
-      width:"200px",
+      dictCode:"CurrentMaterial",
+      width:"350px",
       placeholder: '请输入${title}',
       defaultValue:'',
     },
@@ -328,7 +310,8 @@ export const invMaterialVoucherDetailColumns: JVxeColumn[] = [
     {
       title: '单位',
       key: 'unit',
-      type: JVxeTypes.input,
+      type: JVxeTypes.selectSearch,
+      dictCode:"dict_materials_unit",
       width:"200px",
       placeholder: '请输入${title}',
       defaultValue:'',

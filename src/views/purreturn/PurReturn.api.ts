@@ -12,7 +12,27 @@ enum Api {
   importExcel = '/purreturn/purReturn/importExcel',
   exportXls = '/purreturn/purReturn/exportXls',
   purReturnDetailList = '/purreturn/purReturn/queryPurReturnDetailByMainId',
+  purReturnDetailListByIds='/purreturn/purReturn/queryPurReturnDetailByTargetId',
+  audit = '/purreturn/purReturn/audit',
+  smartRemark = '/purreturn/purReturn/smartRemark',
 }
+/**
+ * 智能备注
+ * @param params
+ * @returns Promise<string>
+ */
+export const getSmartRemark = (params) => {
+  return defHttp.get<string>({
+    url: Api.smartRemark,
+    params,
+  });
+};
+
+/**
+ * 审核/反审URL
+ * @param params
+ */
+export const getAuditUrl = Api.audit;
 /**
  * 导出api
  * @param params
@@ -28,6 +48,11 @@ export const getImportUrl = Api.importExcel;
  * @param params
  */
 export const purReturnDetailList = Api.purReturnDetailList;
+/**
+ * 查询子表数据
+ * @param params
+ */
+export const purReturnDetailListByIds = Api.purReturnDetailListByIds;
 /**
  * 列表接口
  * @param params

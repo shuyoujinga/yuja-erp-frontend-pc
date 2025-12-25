@@ -3,12 +3,23 @@ import {FormSchema} from '/@/components/Table';
 import { rules} from '/@/utils/helper/validator';
 import { render } from '/@/utils/common/renderUtils';
 import {JVxeTypes,JVxeColumn} from '/@/components/jeecg/JVxeTable/types'
+import {h} from "vue";
 //列表数据
 export const columns: BasicColumn[] = [
    {
     title: '退货单号 ',
     align:"center",
-    dataIndex: 'docCode'
+    dataIndex: 'docCode',
+     customRender: ({record}) => {
+       return h(
+         'a',
+         {
+           style: {color: '#1890ff', cursor: 'pointer'},
+           onClick: () => window?.handleDetail?.(record) && record, // 下面会注册
+         },
+         record.docCode,
+       );
+     }
    },
    {
     title: '制单日期',
@@ -80,7 +91,7 @@ export const searchFormSchema: FormSchema[] = [
 	{
       label: "退货单号 ",
       field: "docCode",
-      component: 'Input',
+      component: 'JInput',
       //colProps: {span: 6},
  	},
      {
@@ -97,15 +108,16 @@ export const searchFormSchema: FormSchema[] = [
       field: "supplierCode",
       component: 'JSearchSelect',
       componentProps:{
-         dict:",,"
+         dict:"CurrentSupplier"
       },
       //colProps: {span: 6},
  	},
 	{
       label: "审核状态",
       field: "audit",
-      component: 'JDictSelectTag',
+      component: 'JSearchSelect',
       componentProps:{
+        dict:"dict_audit_status"
       },
       //colProps: {span: 6},
  	},
@@ -116,18 +128,29 @@ export const formSchema: FormSchema[] = [
     label: '退货单号 ',
     field: 'docCode',
     component: 'Input',
+    dynamicDisabled:true
   },
   {
     label: '制单日期',
     field: 'docTime',
     component: 'DatePicker',
+    componentProps: {
+      style: {width: '100%'},
+      valueFormat: 'YYYY-MM-DD',
+    },
+    dynamicRules: ({model, schema}) => {
+      return [
+        {required: true, message: '请输入制单日期!'},
+      ];
+    },
+    defaultValue: new Date(),
   },
   {
     label: '供应商',
     field: 'supplierCode',
     component: 'JSearchSelect',
     componentProps:{
-       dict:""
+       dict:"CurrentSupplier"
     },
     dynamicRules: ({model,schema}) => {
           return [
@@ -136,53 +159,66 @@ export const formSchema: FormSchema[] = [
      },
   },
   {
-    label: '审核状态',
-    field: 'audit',
-    component: 'JDictSelectTag',
-    componentProps:{
-        dictCode:""
-     },
-  },
-  {
-    label: '审核人',
-    field: 'auditBy',
-    component: 'Input',
-  },
-  {
-    label: '审核时间',
-    field: 'auditTime',
-    component: 'DatePicker',
-  },
-  {
     label: '退货类型',
     field: 'returnType',
-    component: 'Input',
+    component: 'JSearchSelect',
+    componentProps:{
+      dict:"dict_return_type"
+    },
+    dynamicRules: ({model,schema}) => {
+      return [
+        { required: true, message: '请输入供应商!'},
+      ];
+    },
   },
   {
-    label: '退货金额',
-    field: 'amount',
-    component: 'InputNumber',
+    label: '采购订单',
+    field: 'orderCodes',
+    component: 'JPopup',
+    componentProps: ({ formActionType }) => {
+      const {setFieldsValue} = formActionType;
+      return{
+        setFieldsValue:setFieldsValue,
+        code:"report_pur_order",
+        fieldConfig: [
+          { source: 'doc_code', target: 'orderCodes' },
+          { source: 'main_id', target: 'orderIds' },
+        ],
+        multi:true,
+        param: {supplier_code:"'supplier_code'"}
+      }
+    },
+    dynamicRules: ({model, schema}) => {
+      return [
+        {required: true, message: '请输入采购订单!'},
+      ];
+    },
   },
   {
-    label: '状态',
-    field: 'status',
-    component: 'InputNumber',
+    label: '备注',
+    field: 'remark',
+    component: 'InputTextArea',
   },
   {
     label: '采购订单_ids',
     field: 'orderIds',
     component: 'Input',
+    show:false
   },
   {
-    label: '采购订单',
-    field: 'orderCodes',
+    label: '',
+    field: 'orderDetailId',
     component: 'Input',
+    show: false
   },
   {
-    label: '备注',
-    field: 'remark',
-    component: 'Input',
+    label: '退货金额',
+    field: 'amount',
+    component: 'InputNumber',
+    dynamicDisabled:true
   },
+
+
 	// TODO 主键隐藏字段，目前写死为ID
 	{
 	  label: '',
@@ -194,77 +230,71 @@ export const formSchema: FormSchema[] = [
 //子表单数据
 //子表表格配置
 export const purReturnDetailColumns: JVxeColumn[] = [
-    {
-      title: '主表ID',
-      key: 'pid',
-      type: JVxeTypes.input,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
-    {
-      title: '订单明细ID',
-      key: 'orderDetailId',
-      type: JVxeTypes.input,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
+
     {
       title: '物料',
       key: 'materialCode',
-      type: JVxeTypes.input,
-      width:"200px",
+      type: JVxeTypes.selectSearch,
+      dictCode:"CurrentMaterial",
+      width:"350px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      disabled:true,
+      validateRules: [{ required: true, message: '${title}不能为空' }],
     },
     {
       title: '订单数',
       key: 'orderQty',
       type: JVxeTypes.inputNumber,
-      width:"200px",
+      width:"100px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      disabled:true,
     },
     {
       title: '单价',
       key: 'orderUnitPrice',
       type: JVxeTypes.inputNumber,
-      width:"200px",
+      width:"100px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      disabled:true,
     },
     {
       title: '订单金额',
       key: 'orderAmount',
       type: JVxeTypes.inputNumber,
-      width:"200px",
+      width:"100px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      disabled:true,
     },
     {
       title: '退货数',
       key: 'qty',
       type: JVxeTypes.inputNumber,
-      width:"200px",
+      width:"120px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      validateRules: [{ required: true, message: '${title}不能为空' }],
     },
     {
       title: '退货单价',
       key: 'unitPrice',
       type: JVxeTypes.inputNumber,
-      width:"200px",
+      width:"120px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      validateRules: [{ required: true, message: '${title}不能为空' }],
     },
     {
       title: '退货金额',
       key: 'amount',
       type: JVxeTypes.inputNumber,
-      width:"200px",
+      width:"120px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      validateRules: [{ required: true, message: '${title}不能为空' }],
     },
     {
       title: '备注',
