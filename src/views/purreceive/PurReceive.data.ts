@@ -43,6 +43,11 @@ export const columns: BasicColumn[] = [
     align:"center",
     dataIndex: 'externalOrderNo'
    },
+  {
+    title: '退货生成',
+    align:"center",
+    dataIndex: 'isReturn_dictText'
+  },
    {
     title: '采购订单',
     align:"center",
