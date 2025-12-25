@@ -54,8 +54,9 @@
 <script lang="ts" name="pursettle-purSettle" setup>
 import {ref, reactive, computed, unref} from 'vue';
 import {BasicTable, useTable, TableAction} from '/@/components/Table';
-import {useListPage} from '/@/hooks/system/useListPage'
+import {useListPage,} from '/@/hooks/system/useListPage'
 import {useModal} from '/@/components/Modal';
+import { useMessage } from '/@/hooks/web/useMessage';
 import PurSettleModal from './components/PurSettleModal.vue'
 import {columns, searchFormSchema, superQuerySchema} from './PurSettle.data';
 import {
@@ -114,7 +115,7 @@ const [registerTable, {reload}, {rowSelection, selectedRowKeys}] = tableContext
 
 // 高级查询配置
 const superQueryConfig = reactive(superQuerySchema);
-
+const {createMessage} = useMessage();
 /**
  * 高级查询事件
  */
@@ -139,6 +140,10 @@ function handleAdd() {
  * 编辑事件
  */
 function handleEdit(record: Recordable) {
+  if (record?.audit === 1) { // 如果 audit 是 ref 或对象形式
+    createMessage.warning('已审核单据不能操作，请先反审核！');
+    return;
+  }
   openModal(true, {
     record,
     isUpdate: true,
@@ -161,6 +166,10 @@ function handleDetail(record: Recordable) {
  * 删除事件
  */
 async function handleDelete(record) {
+  if (record?.audit === 1) { // 如果 audit 是 ref 或对象形式
+    createMessage.warning('已审核单据不能操作，请先反审核！');
+    return;
+  }
   await deleteOne({id: record.id}, handleSuccess);
 }
 

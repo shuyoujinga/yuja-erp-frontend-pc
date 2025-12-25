@@ -50,6 +50,17 @@ export const columns: BasicColumn[] = [
     align: "center",
     dataIndex: 'status_dictText'
   },
+
+  {
+    title: '金额合计',
+    align: "center",
+    dataIndex: 'amount'
+  },
+  {
+    title: '差异金额合计',
+    align: "center",
+    dataIndex: 'differAmount'
+  },
   {
     title: '审核状态',
     align: "center",
@@ -67,16 +78,12 @@ export const columns: BasicColumn[] = [
     customRender: ({text}) => {
       return !text ? "" : (text.length > 10 ? text.substr(0, 10) : text)
     },
+
   },
   {
-    title: '金额合计',
+    title: '备注',
     align: "center",
-    dataIndex: 'amount'
-  },
-  {
-    title: '差异金额合计',
-    align: "center",
-    dataIndex: 'differAmount'
+    dataIndex: 'remark'
   },
 ];
 //查询数据
@@ -84,7 +91,7 @@ export const searchFormSchema: FormSchema[] = [
   {
     label: "结算单号",
     field: "docCode",
-    component: 'Input',
+    component: 'JInput',
     //colProps: {span: 6},
   },
   {
@@ -101,7 +108,7 @@ export const searchFormSchema: FormSchema[] = [
     field: "supplierCode",
     component: 'JSearchSelect',
     componentProps: {
-      dict: "yujiakeji_suppliers,name,code"
+      dict: "CurrentSupplier"
     },
     //colProps: {span: 6},
   },
