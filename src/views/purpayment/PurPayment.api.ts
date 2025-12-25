@@ -12,7 +12,13 @@ enum Api {
   importExcel = '/purpayment/purPayment/importExcel',
   exportXls = '/purpayment/purPayment/exportXls',
   purPaymentDetailList = '/purpayment/purPayment/queryPurPaymentDetailByMainId',
+  audit = '/purpayment/purPayment/audit',
 }
+/**
+ * 审核/反审URL
+ * @param params
+ */
+export const getAuditUrl = Api.audit;
 /**
  * 导出api
  * @param params
