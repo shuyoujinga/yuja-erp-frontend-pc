@@ -171,7 +171,7 @@ export const searchFormSchema: FormSchema[] = [
  	},
 	{
       label: "来源单据号",
-      field: "soureDocCode",
+      field: "sourceDocCode",
       component: 'Input',
       //colProps: {span: 6},
  	},
@@ -253,7 +253,10 @@ export const formSchema: FormSchema[] = [
   {
     label: '冲销凭证',
     field: 'reversalDocId',
-    component: 'Input',
+    component: 'JSearchSelect',
+    componentProps:{
+      dict:"inv_material_voucher,doc_code,id"
+    },
     dynamicDisabled:true
   },
   {
@@ -322,7 +325,8 @@ export const invMaterialVoucherDetailColumns: JVxeColumn[] = [
     {
       title: '仓库',
       key: 'warehouseCode',
-      type: JVxeTypes.input,
+      type: JVxeTypes.selectSearch,
+      dictCode:"CurrentWarehouse",
       width:"200px",
       placeholder: '请输入${title}',
       defaultValue:'',
@@ -371,7 +375,8 @@ export const invMaterialVoucherDetailColumns: JVxeColumn[] = [
     {
       title: '移动类型',
       key: 'moveType',
-      type: JVxeTypes.input,
+      type: JVxeTypes.selectSearch,
+      dictCode:"inv_move_type,move_desc,move_type",
       width:"200px",
       placeholder: '请输入${title}',
       defaultValue:'',
@@ -379,7 +384,8 @@ export const invMaterialVoucherDetailColumns: JVxeColumn[] = [
     {
       title: '出入库类型',
       key: 'stockType',
-      type: JVxeTypes.inputNumber,
+      type: JVxeTypes.selectSearch,
+      dictCode:"dict_in_out_type",
       width:"200px",
       placeholder: '请输入${title}',
       defaultValue:'',
