@@ -80,8 +80,8 @@ export const searchFormSchema: FormSchema[] = [
 export const formSchema: FormSchema[] = [
   {
     label: '计划单号',
-    field: 'docCode',
-    component: 'Input',
+         field: 'docCode',
+    component: 'Input',dynamicDisabled:true 
   },
   {
     label: '单据日期',

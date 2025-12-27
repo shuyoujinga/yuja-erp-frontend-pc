@@ -66,8 +66,8 @@ export const searchFormSchema: FormSchema[] = [
 export const formSchema: FormSchema[] = [
   {
     label: '盘点单号',
-    field: 'docCode',
-    component: 'Input',
+field: 'docCode',
+    component: 'Input',    dynamicDisabled:true
   },
   {
     label: '制单日期',

@@ -99,14 +99,23 @@ export const searchFormSchema: FormSchema[] = [
 export const formSchema: FormSchema[] = [
   {
     label: '收款单号',
-    field: 'docCode',
-    component: 'Input',
+         field: 'docCode',
+    component: 'Input',dynamicDisabled:true 
   },
   {
     label: '制单日期',
     field: 'docTime',
     component: 'DatePicker',
-  },
+    componentProps: {
+      style: {width: '100%'},
+      valueFormat: 'YYYY-MM-DD',
+    },
+    dynamicRules: ({model, schema}) => {
+      return [
+        {required: true, message: '请输入制单日期!'},
+      ];
+    },
+    defaultValue: new Date()},
   {
     label: '客户',
     field: 'customerCode',
