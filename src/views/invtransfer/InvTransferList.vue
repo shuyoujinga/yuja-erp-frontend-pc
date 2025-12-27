@@ -5,7 +5,17 @@
      <!--插槽:table标题-->
       <template #tableTitle>
           <a-button type="primary" @click="handleAdd" preIcon="ant-design:plus-outlined"> 新增</a-button>
-          <a-button  type="primary" preIcon="ant-design:export-outlined" @click="onExportXls"> 导出</a-button>
+        <!-- 审核/反审核按钮 -->
+        <a-button type="primary" preIcon="ant-design:check-circle-twotone"
+                  @click="onAudit('audit', selectedRowKeys)"
+                  :disabled="selectedRowKeys.length === 0">审核
+        </a-button>
+        <a-button type="primary" preIcon="ant-design:close-circle-twotone"
+                  @click="onAudit('reverse', selectedRowKeys)"
+                  :disabled="selectedRowKeys.length === 0">反审核
+        </a-button>
+
+        <a-button  type="primary" preIcon="ant-design:export-outlined" @click="onExportXls"> 导出</a-button>
           <j-upload-button  type="primary" preIcon="ant-design:import-outlined" @click="onImportXls">导入</j-upload-button>
           <a-dropdown v-if="selectedRowKeys.length > 0">
               <template #overlay>
@@ -43,16 +53,24 @@
   import {useModal} from '/@/components/Modal';
   import InvTransferModal from './components/InvTransferModal.vue'
   import {columns, searchFormSchema, superQuerySchema} from './InvTransfer.data';
-  import {list, deleteOne, batchDelete, getImportUrl,getExportUrl} from './InvTransfer.api';
+  import {
+    list,
+    deleteOne,
+    batchDelete,
+    getImportUrl,
+    getExportUrl,
+    getAuditUrl
+  } from './InvTransfer.api';
   import {downloadFile} from '/@/utils/common/renderUtils';
   import { useUserStore } from '/@/store/modules/user';
+  import {useMessage} from "@/hooks/web/useMessage";
   const queryParam = reactive<any>({});
   const checkedKeys = ref<Array<string | number>>([]);
   const userStore = useUserStore();
   //注册model
   const [registerModal, {openModal}] = useModal();
    //注册table数据
-  const { prefixCls,tableContext,onExportXls,onImportXls } = useListPage({
+  const { prefixCls,tableContext,onExportXls,onImportXls,onAudit } = useListPage({
       tableProps:{
            title: '物料调拨',
            api: list,
@@ -85,13 +103,17 @@
             url: getImportUrl,
             success: handleSuccess
         },
+        auditConfig: {
+          url: getAuditUrl,
+          success: handleSuccess
+        },
     })
 
   const [registerTable, {reload},{ rowSelection, selectedRowKeys }] = tableContext
 
   // 高级查询配置
   const superQueryConfig = reactive(superQuerySchema);
-
+ const {createMessage}  = useMessage()
   /**
    * 高级查询事件
    */
@@ -111,16 +133,20 @@
        showFooter: true,
      });
   }
-   /**
-    * 编辑事件
-    */
+  /**
+   * 编辑事件
+   */
   function handleEdit(record: Recordable) {
-     openModal(true, {
-       record,
-       isUpdate: true,
-       showFooter: true,
-     });
-   }
+    if (record?.audit === 1) { // 如果 audit 是 ref 或对象形式
+      createMessage.warning('已审核单据不能操作，请先反审核！');
+      return;
+    }
+    openModal(true, {
+      record,
+      isUpdate: true,
+      showFooter: true,
+    });
+  }
    /**
     * 详情
    */
@@ -135,6 +161,10 @@
     * 删除事件
     */
   async function handleDelete(record) {
+     if (record?.audit === 1) { // 如果 audit 是 ref 或对象形式
+       createMessage.warning('已审核单据不能操作，请先反审核！');
+       return;
+     }
      await deleteOne({id: record.id}, handleSuccess);
    }
    /**
@@ -180,7 +210,7 @@
       }
     ]
   }
-
+window.handleDetail= handleDetail
 </script>
 
 <style scoped>

@@ -1,6 +1,6 @@
 <template>
-  <BasicModal v-bind="$attrs" @register="registerModal" destroyOnClose :title="title" :width="800" @ok="handleSubmit">
-      <BasicForm @register="registerForm" ref="formRef"/>
+  <BasicModal v-bind="$attrs" @register="registerModal" destroyOnClose :title="title" :width="1200" @ok="handleSubmit">
+      <BasicForm @register="registerForm" ref="formRef"  />
   <!-- 子表单区域 -->
     <a-tabs v-model:activeKey="activeKey" animated @change="handleChangeTabs">
       <a-tab-pane tab="物料调拨_明细" key="invTransferDetail" :forceRender="true">
@@ -16,6 +16,7 @@
           :rowSelection="true"
           :disabled="formDisabled"
           :toolbar="true"
+          @valueChange="handleValueChange"
           />
       </a-tab-pane>
     </a-tabs>
@@ -31,6 +32,7 @@
     import {formSchema,invTransferDetailColumns} from '../InvTransfer.data';
     import {saveOrUpdate,invTransferDetailList} from '../InvTransfer.api';
     import { VALIDATE_FAILED } from '/@/utils/common/vxeUtils'
+    import {getMaterialByCodeApi} from "@/views/bom/YujiakejiBom.api";
     // Emits声明
     const emit = defineEmits(['register','success']);
     const isUpdate = ref(true);
@@ -49,7 +51,7 @@
         //labelWidth: 150,
         schemas: formSchema,
         showActionButtonGroup: false,
-        baseColProps: {span: 24}
+        baseColProps: {span: 12}
     });
      //表单赋值
     const [registerModal, {setModalProps, closeModal}] = useModalInner(async (data) => {
@@ -100,6 +102,31 @@
             setModalProps({confirmLoading: false});
         }
     }
+    function handleValueChange({ row, column, value }) {
+      if (column.key === 'materialCode' && value) {
+        getMaterialByCodeApi(value).then(res => {
+          if (res) {
+            const material = res;
+            row.specifications = material.specifications;
+            row.unit = material.unit;
+            row.unitPrice = material.unitPrice;
+          } else {
+            row.specifications = '';
+            row.code = '';
+            row.unit = '';
+            row.unit_price = 0;
+          }
+        });
+
+      }
+      if ((column.key === 'qty'||column.key === 'unitPrice') && value) {
+        row.amount = (Number(row.qty) || 0) * (Number(row.unitPrice) || 0);
+      }
+    }
+
+
+
+
 </script>
 
 <style lang="less" scoped>

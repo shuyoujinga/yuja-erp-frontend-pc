@@ -125,6 +125,10 @@
     * 编辑事件
     */
   function handleEdit(record: Recordable) {
+     if (record?.audit === 1) { // 如果 audit 是 ref 或对象形式
+       createMessage.warning('已审核单据不能操作，请先反审核！');
+       return;
+     }
      openModal(true, {
        record,
        isUpdate: true,
