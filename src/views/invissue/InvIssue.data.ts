@@ -90,17 +90,38 @@ export const formSchema: FormSchema[] = [
   {
     label: '仓库',
     field: 'warehouseCode',
-    component: 'Input',
+    component: 'JSearchSelect',
+    componentProps: {
+      dict: "CurrentWarehouse"
+    },
+    dynamicRules: ({model, schema}) => {
+      return [
+        {required: true, message: '请选择仓库!'},
+      ];
+    }
   },
   {
     label: '领用类型',
     field: 'purpose',
-    component: 'InputNumber',
+    component: 'JSearchSelect',
+    componentProps: {
+      dict: "dict_issue_type"
+    },
+    dynamicRules: ({model, schema}) => {
+      return [
+        {required: true, message: '请选择领用类型!'},
+      ];
+    }
   },
   {
     label: '领用组织',
     field: 'orgCode',
-    component: 'Input',
+    component: 'JSelectDept',
+    dynamicRules: ({model, schema}) => {
+      return [
+        {required: true, message: '请选择领用组织!'},
+      ];
+    }
   },
 
   {
@@ -119,14 +140,6 @@ export const formSchema: FormSchema[] = [
 //子表单数据
 //子表表格配置
 export const invIssueDetailColumns: JVxeColumn[] = [
-  {
-    title: '主表ID',
-    key: 'pid',
-    type: JVxeTypes.input,
-    width: "200px",
-    placeholder: '请输入${title}',
-    defaultValue: '',
-  },
   {
     title: '物料',
     key: 'materialCode',

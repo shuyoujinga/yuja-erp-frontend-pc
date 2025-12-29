@@ -14,8 +14,19 @@ enum Api {
   getDictItems = '/sys/dict/getDictItems/',
   getTableList = '/sys/user/queryUserComponentData',
   getCategoryData = '/sys/category/loadAllData',
+  getStockMaterial = '/sys/commons/queryByMaterialCode/',
 }
 
+
+/**
+ * 根据物料编码查询物料
+ * @param materialCode 物料编码
+ */
+export const getStockMaterial = (materialCode,warehouseCode) => {
+  return defHttp.get({
+    url: Api.getStockMaterial,
+    params: { materialCode,warehouseCode }
+  });};
 /**
  * 上传父路径
  */
