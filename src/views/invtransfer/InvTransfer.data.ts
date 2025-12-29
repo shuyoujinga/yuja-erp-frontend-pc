@@ -1,7 +1,5 @@
 import {BasicColumn} from '/@/components/Table';
 import {FormSchema} from '/@/components/Table';
-import {rules} from '/@/utils/helper/validator';
-import {render} from '/@/utils/common/renderUtils';
 import {JVxeTypes, JVxeColumn} from '/@/components/jeecg/JVxeTable/types'
 import {h} from "vue";
 //列表数据
@@ -11,14 +9,10 @@ export const columns: BasicColumn[] = [
     align: "center",
     dataIndex: 'docCode',
     customRender: ({ record }) => {
-      return h(
-        'a',
-        {
-          style: { color: '#1890ff', cursor: 'pointer' },
-          onClick: () => window?.handleDetail?.(record) && record, // 下面会注册
-        },
-        record.docCode,
-      );
+      return h('a', {
+        style: { color: '#1890ff', cursor: 'pointer' },
+        onClick: () => window?.handleDetail?.(record) && record, // 下面会注册
+      }, record.docCode,);
     }
   },
   {
