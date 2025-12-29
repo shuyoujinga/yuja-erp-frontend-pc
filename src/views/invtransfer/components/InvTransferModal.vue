@@ -151,7 +151,7 @@ function handleFormChange(changedValues) {
     // 2. 清空物料列字典
     const materialColumn = invTransferDetailTable.columns[0]
     delete materialColumn.options
-
+    delete materialColumn.dictCode
     materialColumn.options = []
 
     // 3. 重新加载字典

@@ -12,7 +12,13 @@ enum Api {
   importExcel = '/invissue/invIssue/importExcel',
   exportXls = '/invissue/invIssue/exportXls',
   invIssueDetailList = '/invissue/invIssue/queryInvIssueDetailByMainId',
+  audit='/invissue/invIssue/audit',
 }
+/**
+ * 导出api
+ * @param params
+ */
+export const getAuditUrl = Api.audit;
 /**
  * 导出api
  * @param params

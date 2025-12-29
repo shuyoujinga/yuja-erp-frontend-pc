@@ -43,6 +43,11 @@ export const columns: BasicColumn[] = [
     align: "center",
     dataIndex: 'bizType_dictText'
   },
+  {
+    title: '来源单据类型',
+    align: "center",
+    dataIndex: 'sourceDocType_dictText'
+  },
 ];
 //查询数据
 export const searchFormSchema: FormSchema[] = [
@@ -50,13 +55,11 @@ export const searchFormSchema: FormSchema[] = [
     label: "移动类型编码",
     field: 'moveType',
     component: 'Input',
-    //colProps: {span: 6},
   },
   {
     label: "移动类型说明",
     field: 'moveDesc',
     component: 'Input',
-    //colProps: {span: 6},
   },
   {
     label: "业务类型",
@@ -65,7 +68,6 @@ export const searchFormSchema: FormSchema[] = [
     componentProps: {
       dictCode: "dict_biz_type"
     },
-    //colProps: {span: 6},
   },
 ];
 //表单数据
@@ -115,6 +117,7 @@ export const formSchema: FormSchema[] = [
         {required: true, message: '请输入影响成本!'},
       ];
     },
+    defaultValue:0
   },
   {
     label: '允许冲销',
@@ -128,6 +131,7 @@ export const formSchema: FormSchema[] = [
         {required: true, message: '请输入允许冲销!'},
       ];
     },
+    defaultValue:0
   },
   {
     label: '业务类型',
@@ -142,7 +146,19 @@ export const formSchema: FormSchema[] = [
       ];
     },
   },
-  // TODO 主键隐藏字段，目前写死为ID
+  {
+    label: '来源单据类型',
+    field: 'sourceDocType',
+    component: 'JSearchSelect',
+    componentProps: {
+      dict: "dict_source_doc_type"
+    },
+    dynamicRules: ({model, schema}) => {
+      return [
+        {required: true, message: '请输入业务类型!'},
+      ];
+    },
+  },
   {
     label: '',
     field: 'id',

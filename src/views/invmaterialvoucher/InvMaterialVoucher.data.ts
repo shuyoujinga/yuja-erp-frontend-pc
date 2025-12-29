@@ -48,6 +48,11 @@ export const columns: BasicColumn[] = [
     dataIndex: 'moveType_dictText'
    },
   {
+    title: '使用组织',
+    align:"center",
+    dataIndex: 'orgCode_dictText'
+  },
+  {
     title: '是否冲销',
     align:"center",
     dataIndex: 'isReversal_dictText'
