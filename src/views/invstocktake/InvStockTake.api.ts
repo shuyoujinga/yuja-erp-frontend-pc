@@ -12,7 +12,14 @@ enum Api {
   importExcel = '/invstocktake/invStockTake/importExcel',
   exportXls = '/invstocktake/invStockTake/exportXls',
   invStockTakeDetailList = '/invstocktake/invStockTake/queryInvStockTakeDetailByMainId',
+  invStockTakeDetailListByLocation = '/invstocktake/invStockTake/queryInvStockTakeDetailByLocation',
+  audit='/invstocktake/invStockTake/audit',
 }
+/**
+ * 导出api
+ * @param params
+ */
+export const getAuditUrl = Api.audit;
 /**
  * 导出api
  * @param params
@@ -28,6 +35,13 @@ export const getImportUrl = Api.importExcel;
  * @param params
  */
 export const invStockTakeDetailList = Api.invStockTakeDetailList;
+
+/**
+ * 查询子表数据
+ * @param params
+ */
+export const invStockTakeDetailListByLocation = Api.invStockTakeDetailListByLocation;
+
 /**
  * 列表接口
  * @param params

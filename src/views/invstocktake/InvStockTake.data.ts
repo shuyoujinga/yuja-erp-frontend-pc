@@ -3,12 +3,19 @@ import {FormSchema} from '/@/components/Table';
 import { rules} from '/@/utils/helper/validator';
 import { render } from '/@/utils/common/renderUtils';
 import {JVxeTypes,JVxeColumn} from '/@/components/jeecg/JVxeTable/types'
+import {h} from "vue";
 //列表数据
 export const columns: BasicColumn[] = [
    {
     title: '盘点单号',
     align:"center",
-    dataIndex: 'docCode'
+    dataIndex: 'docCode',
+     customRender: ({ record }) => {
+       return h('a', {
+         style: { color: '#1890ff', cursor: 'pointer' },
+         onClick: () => window?.handleDetail?.(record) && record, // 下面会注册
+       }, record.docCode,);
+     }
    },
    {
     title: '制单日期',
@@ -18,32 +25,32 @@ export const columns: BasicColumn[] = [
    {
     title: '仓库',
     align:"center",
-    dataIndex: 'warehouseCode'
+    dataIndex: 'warehouseCode_dictText'
    },
    {
     title: '库区',
     align:"center",
-    dataIndex: 'areaCode'
+    dataIndex: 'areaCode_dictText'
    },
-   {
-    title: '库位',
-    align:"center",
-    dataIndex: 'locationCode'
-   },
+  // {
+  //  title: '库位',
+  //  align:"center",
+  //  dataIndex: 'locationCode'
+  // },
    {
     title: '状态',
     align:"center",
-    dataIndex: 'status'
+    dataIndex: 'status_dictText'
    },
    {
     title: '审核状态',
     align:"center",
-    dataIndex: 'audit'
+    dataIndex: 'audit_dictText'
    },
    {
     title: '审核人',
     align:"center",
-    dataIndex: 'auditBy'
+    dataIndex: 'auditBy_dictText'
    },
    {
     title: '审核时间',
@@ -61,28 +68,62 @@ export const columns: BasicColumn[] = [
 ];
 //查询数据
 export const searchFormSchema: FormSchema[] = [
+  {
+    label: '盘点单号',
+    field: 'docCode',
+    component: 'JInput',
+  },
+  {
+    label: "制单日期",
+    field: "docTime",
+    component: 'RangePicker',
+    componentProps: {
+      valueType: 'Date',
+    },
+  },
 ];
 //表单数据
 export const formSchema: FormSchema[] = [
   {
     label: '盘点单号',
-field: 'docCode',
-    component: 'Input',    dynamicDisabled:true
+    field: 'docCode',
+    component: 'Input',
+    dynamicDisabled:true
   },
-  {
+ {
     label: '制单日期',
     field: 'docTime',
-    component: 'Input',
-  },
+    component: 'DatePicker',
+    componentProps: {
+      style: {width: '100%'},
+      valueFormat: 'YYYY-MM-DD',
+    },
+    dynamicRules: ({model, schema}) => {
+      return [
+        {required: true, message: '请输入制单日期!'},
+      ];
+    },
+    defaultValue: new Date()},
   {
     label: '仓库',
     field: 'warehouseCode',
-    component: 'Input',
+    component: 'JSearchSelect',
+    componentProps:{
+      dict:'CurrentWarehouse',
+    },
+    dynamicRules: ({model, schema}) => {
+      return [
+        {required: true, message: '请选择仓库!'},
+      ];
+    }
   },
   {
     label: '库区',
     field: 'areaCode',
-    component: 'Input',
+    component: 'JSearchSelect',
+    componentProps:{
+      dict:'inv_stock,location_code,location_code,location_code is not null',
+    },
   },
   {
     label: '库位',
@@ -90,29 +131,9 @@ field: 'docCode',
     component: 'Input',
   },
   {
-    label: '状态',
-    field: 'status',
-    component: 'InputNumber',
-  },
-  {
-    label: '审核状态',
-    field: 'audit',
-    component: 'InputNumber',
-  },
-  {
-    label: '审核人',
-    field: 'auditBy',
-    component: 'Input',
-  },
-  {
-    label: '审核时间',
-    field: 'auditTime',
-    component: 'DatePicker',
-  },
-  {
     label: '备注',
     field: 'remark',
-    component: 'Input',
+    component: 'InputTextArea',
   },
 	// TODO 主键隐藏字段，目前写死为ID
 	{
@@ -125,38 +146,36 @@ field: 'docCode',
 //子表单数据
 //子表表格配置
 export const invStockTakeDetailColumns: JVxeColumn[] = [
-    {
-      title: '主表ID',
-      key: 'pid',
-      type: JVxeTypes.input,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
-    {
-      title: '物料',
-      key: 'materialCode',
-      type: JVxeTypes.input,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
-    {
-      title: '单位',
-      key: 'unit',
-      type: JVxeTypes.input,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
-    {
-      title: '规格',
-      key: 'specifications',
-      type: JVxeTypes.input,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
+  {
+    title: '物料',
+    key: 'materialCode',
+    type: JVxeTypes.selectSearch,
+    dictCode:'CurrentStockMaterial',
+    options:[],
+    width: '350px',
+    placeholder: '请输入${title}',
+    defaultValue: '',
+    validateRules: [{ required: true, message: '${title}不能为空' }],
+  },
+  {
+    title: '单位',
+    key: 'unit',
+    type: JVxeTypes.selectSearch,
+    dictCode:"dict_materials_unit",
+    width: "100px",
+    placeholder: '请输入${title}',
+    defaultValue: '',
+    disabled: true,
+  },
+  {
+    title: '规格',
+    key: 'specifications',
+    type: JVxeTypes.input,
+    width: "200px",
+    placeholder: '请输入${title}',
+    defaultValue: '',
+    disabled: true,
+  },
     {
       title: '账面数',
       key: 'bookQty',
@@ -164,6 +183,7 @@ export const invStockTakeDetailColumns: JVxeColumn[] = [
       width:"200px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      disabled:true
     },
     {
       title: '盘点数',
@@ -172,6 +192,7 @@ export const invStockTakeDetailColumns: JVxeColumn[] = [
       width:"200px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      validateRules: [{ required: true, message: '${title}不能为空' }],
     },
     {
       title: '差异数',
@@ -180,14 +201,17 @@ export const invStockTakeDetailColumns: JVxeColumn[] = [
       width:"200px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      disabled:true
     },
     {
       title: '盘点类型',
       key: 'takeType',
-      type: JVxeTypes.inputNumber,
-      width:"200px",
+      type: JVxeTypes.selectSearch,
+      dictCode:"dict_take_type",
+      width:"100px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      disabled:true
     },
     {
       title: '备注',

@@ -1,6 +1,6 @@
 <template>
-  <BasicModal v-bind="$attrs" @register="registerModal" destroyOnClose :title="title" :width="896" @ok="handleSubmit">
-      <BasicForm @register="registerForm" ref="formRef"/>
+  <BasicModal v-bind="$attrs" @register="registerModal" destroyOnClose :title="title" :width="1200" @ok="handleSubmit">
+      <BasicForm @register="registerForm" @valuesChange="handleFormChange" ref="formRef"/>
   <!-- 子表单区域 -->
     <a-tabs v-model:activeKey="activeKey" animated @change="handleChangeTabs">
       <a-tab-pane tab="库存盘点_明细" key="invStockTakeDetail" :forceRender="true">
@@ -16,6 +16,7 @@
           :rowSelection="true"
           :disabled="formDisabled"
           :toolbar="true"
+          @valueChange="handleValueChange"
           />
       </a-tab-pane>
     </a-tabs>
@@ -29,11 +30,16 @@
     import { JVxeTable } from '/@/components/jeecg/JVxeTable'
     import { useJvxeMethod } from '/@/hooks/system/useJvxeMethods.ts'
     import {formSchema,invStockTakeDetailColumns} from '../InvStockTake.data';
-    import {saveOrUpdate,invStockTakeDetailList} from '../InvStockTake.api';
-    import { VALIDATE_FAILED } from '/@/utils/common/vxeUtils'
+    import {
+      saveOrUpdate,
+      invStockTakeDetailList,
+      invStockTakeDetailListByLocation
+    } from '../InvStockTake.api';
+
     // Emits声明
     const emit = defineEmits(['register','success']);
     const isUpdate = ref(true);
+    const isFormInitializing = ref(false);
     const formDisabled = ref(false);
     const refKeys = ref(['invStockTakeDetail', ]);
     const activeKey = ref('invStockTakeDetail');
@@ -45,7 +51,7 @@
           columns:invStockTakeDetailColumns
     })
     //表单配置
-    const [registerForm, {setProps,resetFields, setFieldsValue, validate}] = useForm({
+    const [registerForm, {setProps,resetFields,getFieldsValue, setFieldsValue, validate}] = useForm({
         //labelWidth: 150,
         schemas: formSchema,
         showActionButtonGroup: false,
@@ -59,11 +65,13 @@
         isUpdate.value = !!data?.isUpdate;
         formDisabled.value = !data?.showFooter;
         if (unref(isUpdate)) {
+          isFormInitializing.value = true;
             //表单赋值
             await setFieldsValue({
                 ...data.record,
             });
              requestSubTableData(invStockTakeDetailList, {id:data?.record?.id}, invStockTakeDetailTable)
+          isFormInitializing.value = false;
         }
         // 隐藏底部时禁用整个表单
        setProps({ disabled: !data?.showFooter })
@@ -100,6 +108,36 @@
             setModalProps({confirmLoading: false});
         }
     }
+    function handleValueChange({ row, column }) {
+
+      // 金额联动
+      if (column.key === 'qty' ) {
+        row.diffQty = (Number(row.qty) || 0) - (Number(row.bookQty) || 0);
+        row.takeType = row.diffQty > 0
+          ? 1
+          : (row.diffQty < 0 ? -1 : 0);
+
+      }
+    }
+
+
+
+
+
+    function handleFormChange(changedValues) {
+      // 初始化加载阶段，任何联动都不触发
+      if (isFormInitializing.value) {
+        return;
+      }
+      if (changedValues.warehouseCode !== undefined||changedValues.areaCode !== undefined) {
+        const { warehouseCode,areaCode } = getFieldsValue() || {};
+        if(warehouseCode&&areaCode){
+          requestSubTableData(invStockTakeDetailListByLocation, {id:warehouseCode+"_"+areaCode}, invStockTakeDetailTable)
+        }
+      }
+    }
+
+
 </script>
 
 <style lang="less" scoped>

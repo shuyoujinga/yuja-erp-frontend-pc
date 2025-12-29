@@ -169,7 +169,7 @@ export const formSchema: FormSchema[] = [
   {
     label: '备注',
     field: 'remark',
-    component: 'Input',
+    component: 'InputTextArea',
   },
   {
     label: '状态',

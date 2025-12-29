@@ -121,7 +121,7 @@ export const formSchema: FormSchema[] = [
   {
     label: '备注',
     field: 'remark',
-    component: 'Input',
+    component: 'InputTextArea',
   },
   {
     label: '要求交期',

@@ -140,7 +140,7 @@ export const formSchema: FormSchema[] = [
   {
     label: '备注',
     field: 'remark',
-    component: 'Input',
+    component: 'InputTextArea',
   },
   // TODO 主键隐藏字段，目前写死为ID
   {

@@ -64,11 +64,20 @@ export const formSchema: FormSchema[] = [
          field: 'docCode',
     component: 'Input',dynamicDisabled:true 
   },
-  {
+ {
     label: '制单日期',
     field: 'docTime',
-    component: 'Input',
-  },
+    component: 'DatePicker',
+    componentProps: {
+      style: {width: '100%'},
+      valueFormat: 'YYYY-MM-DD',
+    },
+    dynamicRules: ({model, schema}) => {
+      return [
+        {required: true, message: '请输入制单日期!'},
+      ];
+    },
+    defaultValue: new Date()},
   {
     label: '客户',
     field: 'customerCode',
@@ -102,7 +111,7 @@ export const formSchema: FormSchema[] = [
   {
     label: '备注',
     field: 'remark',
-    component: 'Input',
+    component: 'InputTextArea',
   },
 	// TODO 主键隐藏字段，目前写死为ID
 	{
