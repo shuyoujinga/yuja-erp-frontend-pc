@@ -1,6 +1,6 @@
 <template>
-  <BasicModal v-bind="$attrs" @register="registerModal" destroyOnClose :title="title" :width="800" @ok="handleSubmit">
-      <BasicForm @register="registerForm" ref="formRef"/>
+  <BasicModal v-bind="$attrs" @register="registerModal" destroyOnClose :title="title" :width="1500" @ok="handleSubmit">
+      <BasicForm @register="registerForm" ref="formRef"  />
   <!-- 子表单区域 -->
     <a-tabs v-model:activeKey="activeKey" animated @change="handleChangeTabs">
       <a-tab-pane tab="销售报价_明细" key="salQuoteDetail" :forceRender="true">
@@ -16,6 +16,7 @@
           :rowSelection="true"
           :disabled="formDisabled"
           :toolbar="true"
+          @valueChange="handleValueChange"
           />
       </a-tab-pane>
     </a-tabs>
@@ -30,7 +31,7 @@
     import { useJvxeMethod } from '/@/hooks/system/useJvxeMethods.ts'
     import {formSchema,salQuoteDetailColumns} from '../SalQuote.data';
     import {saveOrUpdate,salQuoteDetailList} from '../SalQuote.api';
-    import { VALIDATE_FAILED } from '/@/utils/common/vxeUtils'
+    import {getStockMaterial, getStockMaterialInSale} from "@/api/common/api";
     // Emits声明
     const emit = defineEmits(['register','success']);
     const isUpdate = ref(true);
@@ -49,7 +50,7 @@
         //labelWidth: 150,
         schemas: formSchema,
         showActionButtonGroup: false,
-        baseColProps: {span: 24}
+        baseColProps: {span: 12}
     });
      //表单赋值
     const [registerModal, {setModalProps, closeModal}] = useModalInner(async (data) => {
@@ -100,6 +101,50 @@
             setModalProps({confirmLoading: false});
         }
     }
+
+    function handleValueChange({ row, column, value }) {
+
+      // 只在“物料变化 + 仓库已选”的情况下查库存物料
+      if (column.key === 'materialCode' && value  ) {
+        getStockMaterialInSale(value).then((material) => {
+          if (!material) {
+            clearMaterialRow(row);
+            return;
+          }
+
+          row.specifications = material.specifications;
+          row.unit = material.unit;
+          row.unitPrice = material.unitPrice;
+          row.stockQty = material.stockQty || 0;
+        });
+      }
+
+      // 金额联动
+      if (column.key === 'qty' || column.key === 'unitPrice' ||  column.key === 'discountRate'  ||  column.key === 'taxUnitPrice') {
+        console.log('我的行',row)
+        const discountRate = Number(row.discountRate);
+        const rate = Number.isFinite(discountRate) && discountRate > 0 ? discountRate : 1;
+
+        const qty = Number(row.qty) || 0;
+        const unitPrice = Number(row.unitPrice) || 0;
+        const taxUnitPrice = Number(row.taxUnitPrice) || 0;
+
+        row.amount = rate * qty * unitPrice;
+        row.taxAmount = rate * qty * taxUnitPrice;
+
+      }
+    }
+
+    function clearMaterialRow(row) {
+      row.specifications = '';
+      row.unit = '';
+      row.unitPrice = 0;
+      row.stockQty = 0;
+    }
+
+
+
+
 </script>
 
 <style lang="less" scoped>

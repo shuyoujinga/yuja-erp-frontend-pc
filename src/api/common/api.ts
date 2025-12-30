@@ -15,9 +15,19 @@ enum Api {
   getTableList = '/sys/user/queryUserComponentData',
   getCategoryData = '/sys/category/loadAllData',
   getStockMaterial = '/sys/commons/queryByMaterialCode/',
+  getStockMaterialInSale = '/sys/commons/queryByMaterialCodeInSale/',
 }
 
 
+/**
+ * 根据物料编码查询物料
+ * @param materialCode 物料编码
+ */
+export const getStockMaterialInSale = (materialCode) => {
+  return defHttp.get({
+    url: Api.getStockMaterialInSale,
+    params: { materialCode }
+  });};
 /**
  * 根据物料编码查询物料
  * @param materialCode 物料编码

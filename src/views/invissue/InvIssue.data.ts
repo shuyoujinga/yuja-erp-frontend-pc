@@ -51,7 +51,7 @@ export const columns: BasicColumn[] = [
   {
     title: '审核人',
     align: "center",
-    dataIndex: 'auditBy_dictText'
+    dataIndex: "auditBy_dictText"
   },
   {
     title: '审核时间',

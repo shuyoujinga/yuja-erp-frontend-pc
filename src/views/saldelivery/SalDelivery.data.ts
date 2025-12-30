@@ -36,7 +36,7 @@ export const columns: BasicColumn[] = [
    {
     title: '客户',
     align:"center",
-    dataIndex: 'customerCode'
+    dataIndex: 'customerCode_dictText'
    },
    {
     title: '状态',
@@ -51,7 +51,7 @@ export const columns: BasicColumn[] = [
    {
     title: '审批人',
     align:"center",
-    dataIndex: 'auditBy'
+    dataIndex: "auditBy_dictText"
    },
    {
     title: '审批时间',
