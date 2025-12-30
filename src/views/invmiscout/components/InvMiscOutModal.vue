@@ -1,6 +1,6 @@
 <template>
-  <BasicModal v-bind="$attrs" @register="registerModal" destroyOnClose :title="title" :width="896" @ok="handleSubmit">
-      <BasicForm @register="registerForm" ref="formRef"/>
+  <BasicModal v-bind="$attrs" @register="registerModal" destroyOnClose :title="title" :width="1200" @ok="handleSubmit">
+      <BasicForm @register="registerForm" ref="formRef"  @valuesChange="handleFormChange"/>
   <!-- 子表单区域 -->
     <a-tabs v-model:activeKey="activeKey" animated @change="handleChangeTabs">
       <a-tab-pane tab="其他入库_明细" key="invMiscOutDetail" :forceRender="true">
@@ -16,6 +16,7 @@
           :rowSelection="true"
           :disabled="formDisabled"
           :toolbar="true"
+          @valueChange="handleValueChange"
           />
       </a-tab-pane>
     </a-tabs>
@@ -31,6 +32,7 @@
     import {formSchema,invMiscOutDetailColumns} from '../InvMiscOut.data';
     import {saveOrUpdate,invMiscOutDetailList} from '../InvMiscOut.api';
     import { VALIDATE_FAILED } from '/@/utils/common/vxeUtils'
+    import {getDictItems, getStockMaterial} from "@/api/common/api";
     // Emits声明
     const emit = defineEmits(['register','success']);
     const isUpdate = ref(true);
@@ -45,7 +47,7 @@
           columns:invMiscOutDetailColumns
     })
     //表单配置
-    const [registerForm, {setProps,resetFields, setFieldsValue, validate}] = useForm({
+    const [registerForm, {setProps,resetFields,getFieldsValue, setFieldsValue, validate}] = useForm({
         //labelWidth: 150,
         schemas: formSchema,
         showActionButtonGroup: false,
@@ -100,6 +102,64 @@
             setModalProps({confirmLoading: false});
         }
     }
+
+    function handleValueChange({ row, column, value }) {
+      // 主表取值（一次取全量，不要频繁调用）
+      const { warehouseCode } = getFieldsValue() || {};
+
+      // 只在“物料变化 + 仓库已选”的情况下查库存物料
+      if (column.key === 'materialCode' && value && warehouseCode) {
+        getStockMaterial(value, warehouseCode).then((material) => {
+          if (!material) {
+            clearMaterialRow(row);
+            return;
+          }
+
+          row.specifications = material.specifications;
+          row.unit = material.unit;
+          row.unitPrice = material.unitPrice;
+          row.stockQty = material.stockQty;
+        });
+      }
+
+
+    }
+
+    function clearMaterialRow(row) {
+      row.specifications = '';
+      row.unit = '';
+      row.unitPrice = 0;
+      row.stockQty = 0;
+    }
+
+
+
+    function handleFormChange(changedValues) {
+      if (changedValues.warehouseCode !== undefined) {
+        // 1. 清空明细数据
+        invMiscOutDetailTable.dataSource = []
+
+        // 2. 清空物料列字典
+        const materialColumn = invMiscOutDetailTable.columns[0]
+        delete materialColumn.dictCode
+        delete materialColumn.options
+
+        materialColumn.options = []
+
+        // 3. 重新加载字典
+        getDictItems(`CurrentStockMaterial,${changedValues.warehouseCode}`)
+          .then(res => {
+            if (!Array.isArray(res)) return
+            materialColumn.options = res.map(item => ({
+              title: item.text,
+              text: item.text,
+              value: item.value
+            }))
+          })
+        invMiscOutDetailTable.columns = [...invMiscOutDetailTable.columns]
+      }
+    }
+
 </script>
 
 <style lang="less" scoped>
