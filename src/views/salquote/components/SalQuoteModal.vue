@@ -121,7 +121,7 @@
 
       // 金额联动
       if (column.key === 'qty' || column.key === 'unitPrice' ||  column.key === 'discountRate'  ||  column.key === 'taxUnitPrice') {
-        console.log('我的行',row)
+
         const discountRate = Number(row.discountRate);
         const rate = Number.isFinite(discountRate) && discountRate > 0 ? discountRate : 1;
 
@@ -129,10 +129,16 @@
         const unitPrice = Number(row.unitPrice) || 0;
         const taxUnitPrice = Number(row.taxUnitPrice) || 0;
 
-        row.amount = rate * qty * unitPrice;
-        row.taxAmount = rate * qty * taxUnitPrice;
+        row.amount = round(rate * qty * unitPrice, 2);
+        row.taxAmount = round(rate * qty * taxUnitPrice, 2);
 
       }
+
+      function round(num, scale = 2) {
+        const factor = Math.pow(10, scale);
+        return Math.round((Number(num) || 0) * factor) / factor;
+      }
+
     }
 
     function clearMaterialRow(row) {

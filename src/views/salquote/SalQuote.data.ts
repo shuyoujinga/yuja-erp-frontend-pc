@@ -160,14 +160,16 @@ export const salQuoteDetailColumns: JVxeColumn[] = [
     defaultValue: '',
     validateRules: [{ required: true, message: '${title}不能为空' }],
   },
-  {
+   {
     title: '单位',
     key: 'unit',
-    type: JVxeTypes.input,
+    type: JVxeTypes.selectSearch,
+    options: [],
+    dictCode: "dict_materials_unit",
     width: "100px",
     placeholder: '请输入${title}',
     defaultValue: '',
-    disabled:true
+    disabled: true
   },
   {
     title: '规格',
