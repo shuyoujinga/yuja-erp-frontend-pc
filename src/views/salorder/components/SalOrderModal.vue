@@ -113,6 +113,7 @@
           salQuoteDocCodes: undefined,
           salQuoteIds: undefined,
           salQuoteDetailIds: undefined,
+          customerCode: undefined,
         });
         salOrderDetailTable.dataSource = [];
       }
