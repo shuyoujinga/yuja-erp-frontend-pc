@@ -12,7 +12,13 @@ enum Api {
   importExcel = '/salprepay/salPrepay/importExcel',
   exportXls = '/salprepay/salPrepay/exportXls',
   salPrepayDetailList = '/salprepay/salPrepay/querySalPrepayDetailByMainId',
+  audit = '/salprepay/salPrepay/audit',
 }
+/**
+ * 审核/反审URL
+ * @param params
+ */
+export const getAuditUrl = Api.audit;
 /**
  * 导出api
  * @param params

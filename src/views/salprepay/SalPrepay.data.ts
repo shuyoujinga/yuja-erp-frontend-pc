@@ -1,14 +1,19 @@
 import {BasicColumn} from '/@/components/Table';
 import {FormSchema} from '/@/components/Table';
-import { rules} from '/@/utils/helper/validator';
-import { render } from '/@/utils/common/renderUtils';
 import {JVxeTypes,JVxeColumn} from '/@/components/jeecg/JVxeTable/types'
+import {h} from "vue";
 //列表数据
 export const columns: BasicColumn[] = [
    {
     title: '预收单号',
     align:"center",
-    dataIndex: 'docCode'
+    dataIndex: 'docCode',
+     customRender: ({record}) => {
+       return h('a', {
+         style: {color: '#1890ff', cursor: 'pointer'},
+         onClick: () => window?.handleDetail?.(record) && record, // 下面会注册
+       }, record.docCode,);
+     }
    },
    {
     title: '制单日期',
@@ -25,6 +30,11 @@ export const columns: BasicColumn[] = [
     align:"center",
     dataIndex: 'amount'
    },
+  {
+    title: '状态',
+    align:"center",
+    dataIndex: 'status_dictText'
+  },
    {
     title: '审核状态',
     align:"center",
@@ -43,11 +53,7 @@ export const columns: BasicColumn[] = [
       return !text?"":(text.length>10?text.substr(0,10):text)
     },
    },
-   {
-    title: '状态',
-    align:"center",
-    dataIndex: 'status'
-   },
+
    {
     title: '备注',
     align:"center",
@@ -56,13 +62,35 @@ export const columns: BasicColumn[] = [
 ];
 //查询数据
 export const searchFormSchema: FormSchema[] = [
+  {
+    label: "预收单号",
+    field: "docCode",
+    component: 'JInput',
+  },
+  {
+    label: "制单日期",
+    field: "docTime",
+    component: 'RangePicker',
+    componentProps: {
+      valueType: 'Date',
+    },
+  },
+  {
+    label: "客户",
+    field: "customerCode",
+    component: 'JSearchSelect',
+    componentProps: {
+      dict: "CurrentCustomer"
+    }
+  },
 ];
 //表单数据
 export const formSchema: FormSchema[] = [
   {
     label: '预收单号',
-         field: 'docCode',
-    component: 'Input',dynamicDisabled:true 
+    field: 'docCode',
+    component: 'Input',
+    dynamicDisabled:true
   },
  {
     label: '制单日期',
@@ -81,32 +109,32 @@ export const formSchema: FormSchema[] = [
   {
     label: '客户',
     field: 'customerCode',
-    component: 'Input',
+    component: 'JSearchSelect',
+    componentProps: {
+      dict: "CurrentCustomer"
+    },
+    dynamicRules: ({model, schema}) => {
+      return [
+        {required: true, message: '请选择客户!'},
+      ];
+    }
   },
   {
-    label: '金额',
+    label: '预收使用',
+    field: 'useAmount',
+    component: 'InputNumber',
+    dynamicDisabled:true
+  },
+  {
+    label: '本次预收',
     field: 'amount',
     component: 'InputNumber',
   },
   {
-    label: '审核状态',
-    field: 'audit',
+    label: '预收余额',
+    field: 'prepayAmount',
     component: 'InputNumber',
-  },
-  {
-    label: '审核人',
-    field: 'auditBy',
-    component: 'Input',
-  },
-  {
-    label: '审核时间',
-    field: 'auditTime',
-    component: 'DatePicker',
-  },
-  {
-    label: '状态',
-    field: 'status',
-    component: 'InputNumber',
+    dynamicDisabled:true
   },
   {
     label: '备注',
@@ -125,36 +153,22 @@ export const formSchema: FormSchema[] = [
 //子表表格配置
 export const salPrepayDetailColumns: JVxeColumn[] = [
     {
-      title: '主表ID',
-      key: 'pid',
-      type: JVxeTypes.input,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
-    {
-      title: '销售收款ID',
-      key: 'receiptId',
-      type: JVxeTypes.input,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
-    {
-      title: '收款单号',
+      title: '结算单号',
       key: 'receiptCode',
       type: JVxeTypes.input,
       width:"200px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      disabled:true
     },
     {
-      title: '金额',
+      title: '冲抵金额',
       key: 'amount',
       type: JVxeTypes.inputNumber,
       width:"200px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      disabled:true
     },
     {
       title: '备注',
@@ -163,6 +177,7 @@ export const salPrepayDetailColumns: JVxeColumn[] = [
       width:"200px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      disabled:true
     },
   ]
 

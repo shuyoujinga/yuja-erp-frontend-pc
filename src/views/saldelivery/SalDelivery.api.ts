@@ -13,7 +13,7 @@ enum Api {
   exportXls = '/saldelivery/salDelivery/exportXls',
   salDeliveryDetailList = '/saldelivery/salDelivery/querySalDeliveryDetailByMainId',
   salDeliveryDetailListByIds = '/saldelivery/salDelivery/querySalDeliveryDetailByTargetId',
-  audit = '/saldelivery/salDelivery//audit',
+  audit = '/saldelivery/salDelivery/audit',
 }
 /**
  * 审核/反审URL
