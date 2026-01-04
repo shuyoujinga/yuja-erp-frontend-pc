@@ -13,7 +13,7 @@
       rowSelection
       keepSource
       asyncRemove
-      :height="340"
+      :height="auto"
       :loading="loading"
       :columns="columns"
       :dataSource="dataSource"

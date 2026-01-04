@@ -11,7 +11,7 @@
           :loading="invDisassemblyDetailTable.loading"
           :columns="invDisassemblyDetailTable.columns"
           :dataSource="invDisassemblyDetailTable.dataSource"
-          :height="340"
+          :height="auto"
           :rowNumber="true"
           :rowSelection="true"
           :disabled="formDisabled"

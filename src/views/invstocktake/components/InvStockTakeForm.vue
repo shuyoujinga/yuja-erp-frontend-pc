@@ -12,7 +12,7 @@
               :loading="invStockTakeDetailTable.loading"
               :columns="invStockTakeDetailTable.columns"
               :dataSource="invStockTakeDetailTable.dataSource"
-              :height="340"
+              :height="auto"
               :rowNumber="true"
               :rowSelection="true"
               :disabled="formDisabled"

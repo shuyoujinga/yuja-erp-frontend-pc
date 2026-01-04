@@ -12,7 +12,7 @@
               :loading="purSettleDetailTable.loading"
               :columns="purSettleDetailTable.columns"
               :dataSource="purSettleDetailTable.dataSource"
-              :height="340"
+              :height="auto"
               :rowNumber="true"
               :rowSelection="true"
               :disabled="formDisabled"

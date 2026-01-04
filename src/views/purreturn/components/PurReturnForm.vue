@@ -12,7 +12,7 @@
               :loading="purReturnDetailTable.loading"
               :columns="purReturnDetailTable.columns"
               :dataSource="purReturnDetailTable.dataSource"
-              :height="340"
+              :height="auto"
               :rowNumber="true"
               :rowSelection="true"
               :disabled="formDisabled"

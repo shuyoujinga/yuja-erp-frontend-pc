@@ -11,7 +11,7 @@
           :loading="prdReportDetailTable.loading"
           :columns="prdReportDetailTable.columns"
           :dataSource="prdReportDetailTable.dataSource"
-          :height="340"
+          :height="auto"
           :rowNumber="true"
           :rowSelection="true"
           :disabled="formDisabled"

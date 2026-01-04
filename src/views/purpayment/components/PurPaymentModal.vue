@@ -11,7 +11,7 @@
           :loading="purPaymentDetailTable.loading"
           :columns="purPaymentDetailTable.columns"
           :dataSource="purPaymentDetailTable.dataSource"
-          :height="340"
+          :height="auto"
           :rowNumber="true"
           :rowSelection="true"
           :disabled="formDisabled"

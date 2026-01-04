@@ -12,7 +12,7 @@
               :loading="purReceiveDetailTable.loading"
               :columns="purReceiveDetailTable.columns"
               :dataSource="purReceiveDetailTable.dataSource"
-              :height="340"
+              :height="auto"
               :rowNumber="true"
               :rowSelection="true"
               :disabled="formDisabled"

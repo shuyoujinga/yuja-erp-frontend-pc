@@ -11,7 +11,7 @@
           :loading="invMiscInDetailTable.loading"
           :columns="invMiscInDetailTable.columns"
           :dataSource="invMiscInDetailTable.dataSource"
-          :height="340"
+          :height="auto"
           :rowNumber="true"
           :rowSelection="true"
           :disabled="formDisabled"

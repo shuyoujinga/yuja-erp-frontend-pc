@@ -11,7 +11,7 @@
           :loading="salPrepayDetailTable.loading"
           :columns="salPrepayDetailTable.columns"
           :dataSource="salPrepayDetailTable.dataSource"
-          :height="340"
+          :height="auto"
           :rowNumber="true"
           :rowSelection="true"
           :disabled="formDisabled"

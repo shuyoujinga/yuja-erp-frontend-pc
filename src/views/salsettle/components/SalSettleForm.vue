@@ -12,7 +12,7 @@
               :loading="salSettleDetailTable.loading"
               :columns="salSettleDetailTable.columns"
               :dataSource="salSettleDetailTable.dataSource"
-              :height="340"
+              :height="auto"
               :rowNumber="true"
               :rowSelection="true"
               :disabled="formDisabled"

@@ -1,14 +1,19 @@
 import {BasicColumn} from '/@/components/Table';
 import {FormSchema} from '/@/components/Table';
-import { rules} from '/@/utils/helper/validator';
-import { render } from '/@/utils/common/renderUtils';
 import {JVxeTypes,JVxeColumn} from '/@/components/jeecg/JVxeTable/types'
+import {h} from "vue";
 //列表数据
 export const columns: BasicColumn[] = [
    {
     title: '业务单号',
     align:"center",
-    dataIndex: 'docCode'
+    dataIndex: 'docCode',
+     customRender: ({record}) => {
+       return h('a', {
+         style: {color: '#1890ff', cursor: 'pointer'},
+         onClick: () => window?.handleDetail?.(record) && record, // 下面会注册
+       }, record.docCode,);
+     }
    },
    {
     title: '制单日期',
@@ -32,14 +37,14 @@ export const columns: BasicColumn[] = [
     },
    },
    {
-    title: '金额合计',
+    title: '计划类型',
     align:"center",
-    dataIndex: 'amount'
+    dataIndex: 'bizPlanType_dictText'
    },
    {
     title: '状态',
     align:"center",
-    dataIndex: 'status'
+    dataIndex: 'status_dictText'
    },
    {
     title: '审核状态',
@@ -67,13 +72,45 @@ export const columns: BasicColumn[] = [
 ];
 //查询数据
 export const searchFormSchema: FormSchema[] = [
+  {
+    label: "业务计划",
+    field: "docCode",
+    component: 'JInput',
+  },
+  {
+    label: "制单日期",
+    field: "docTime",
+    component: 'RangePicker',
+    componentProps: {
+      valueType: 'Date',
+    },
+    //colProps: {span: 6},
+  },
+  {
+    label: "客户",
+    field: "customerCode",
+    component: 'JSearchSelect',
+    componentProps: {
+      dict: "CurrentCustomer"
+    }
+
+  },
+  {
+    label: '计划类型',
+    field: 'bizPlanType',
+    component: 'JSearchSelect',
+    componentProps: {
+      dict: "dict_biz_plan_type"
+    },
+  }
 ];
 //表单数据
 export const formSchema: FormSchema[] = [
   {
     label: '业务单号',
-         field: 'docCode',
-    component: 'Input',dynamicDisabled:true 
+    field: 'docCode',
+    component: 'Input',
+    dynamicDisabled:true
   },
   {
     label: '制单日期',
@@ -90,39 +127,77 @@ export const formSchema: FormSchema[] = [
     },
     defaultValue: new Date()},
   {
+    label: '计划类型',
+    field: 'bizPlanType',
+    component: 'JSearchSelect',
+    componentProps: {
+      dict: "dict_biz_plan_type"
+    },
+    dynamicRules: ({model, schema}) => {
+      return [
+        {required: true, message: '请选择计划类型!'},
+      ];
+    },
+    defaultValue:0
+  },
+  {
     label: '客户',
     field: 'customerCode',
-    component: 'Input',
+    component: 'JSearchSelect',
+    componentProps: {
+      dict: "CurrentCustomer"
+    },
+    ifShow:({values}) => {
+      return values.bizPlanType== 0
+    },
+    dynamicRules: ({model, schema}) => {
+      return [
+        {required: true, message: '请选择客户!'},
+      ];
+    },
   },
+
+
   {
     label: '要求交期',
     field: 'requiredDeliveryTime',
     component: 'DatePicker',
+    componentProps: {
+      style: {width: '100%'},
+      valueFormat: 'YYYY-MM-DD',
+    },
+    dynamicRules: ({model, schema}) => {
+      return [
+        {required: true, message: '请输入制单日期!'},
+      ];
+    }
   },
   {
-    label: '金额合计',
-    field: 'amount',
-    component: 'InputNumber',
-  },
-  {
-    label: '状态',
-    field: 'status',
-    component: 'InputNumber',
-  },
-  {
-    label: '审核状态',
-    field: 'audit',
-    component: 'InputNumber',
-  },
-  {
-    label: '审核人',
-    field: 'auditBy',
-    component: 'Input',
-  },
-  {
-    label: '审核时间',
-    field: 'auditTime',
-    component: 'DatePicker',
+    label: '销售订单',
+    field: 'salOrderDocCodes',
+    component: 'JPopup',
+    componentProps: ({formActionType,formModel}) => {
+      const {setFieldsValue} = formActionType;
+      return {
+        setFieldsValue: setFieldsValue,
+        code: "report_sal_order",
+        fieldConfig: [
+          {source: 'doc_code', target: 'salOrderDocCodes'},
+          {source: 'id', target: 'salOrderIds'},
+          {source: 'detail_id', target: 'salOrderDetailIds'},
+        ],
+        multi: true,
+        param: {customer_code: `'${formModel.customerCode}'`}
+      }
+    },
+    ifShow:({values}) => {
+        return values.bizPlanType== 0
+    },
+    dynamicRules: ({model, schema}) => {
+      return [
+        {required: true, message: '请选择销售订单!'},
+      ];
+    },
   },
   {
     label: '备注',
@@ -130,6 +205,19 @@ export const formSchema: FormSchema[] = [
     component: 'InputTextArea',
   },
 	// TODO 主键隐藏字段，目前写死为ID
+  {
+    label: '',
+    field: 'salOrderIds',
+    component: 'Input',
+    show: false
+  },
+  {
+    label: '',
+    field: 'salOrderDetailIds',
+    component: 'Input',
+    show: false
+  },
+
 	{
 	  label: '',
 	  field: 'id',
@@ -140,85 +228,65 @@ export const formSchema: FormSchema[] = [
 //子表单数据
 //子表表格配置
 export const salBizPlanDetailColumns: JVxeColumn[] = [
-    {
-      title: '主表ID',
-      key: 'pid',
-      type: JVxeTypes.input,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
-    {
-      title: '订单明细ID',
-      key: 'orderDetailId',
-      type: JVxeTypes.input,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
-    {
-      title: '货品',
-      key: 'materialCode',
-      type: JVxeTypes.input,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
-    {
-      title: '单位',
-      key: 'unit',
-      type: JVxeTypes.input,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
-    {
-      title: '规格',
-      key: 'specifications',
-      type: JVxeTypes.input,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
+
+  {
+    title: '货品',
+    key: 'materialCode',
+    type: JVxeTypes.selectSearch,
+    dictCode:'CurrentMaterial',
+    width: "350px",
+    placeholder: '请输入${title}',
+    defaultValue: '',
+    disabled: true,
+    validateRules: [{required: true, message: '${title}不能为空'}],
+  },
+  {
+    title: '单位',
+    key: 'unit',
+    type: JVxeTypes.selectSearch,
+    options: [],
+    dictCode: "dict_materials_unit",
+    width: "100px",
+    placeholder: '请输入${title}',
+    defaultValue: '',
+    disabled: true
+  },
+  {
+    title: '规格',
+    key: 'specifications',
+    type: JVxeTypes.input,
+    width: "200px",
+    placeholder: '请输入${title}',
+    defaultValue: '',
+    disabled: true
+  },
     {
       title: '订单数',
       key: 'orderQty',
       type: JVxeTypes.inputNumber,
-      width:"200px",
+      width:"100px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      disabled: true
     },
     {
       title: '计划数',
       key: 'qty',
       type: JVxeTypes.inputNumber,
-      width:"200px",
+      width:"100px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      validateRules: [{required: true, message: '${title}不能为空'}],
     },
-    {
-      title: '单价',
-      key: 'unitPrice',
-      type: JVxeTypes.inputNumber,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
-    {
-      title: '金额',
-      key: 'amount',
-      type: JVxeTypes.inputNumber,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
+
     {
       title: 'BOM编码',
       key: 'bomCode',
       type: JVxeTypes.input,
-      width:"200px",
+      width:"150px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      disabled: true
     },
     {
       title: '备注',
@@ -231,82 +299,106 @@ export const salBizPlanDetailColumns: JVxeColumn[] = [
   ]
 export const salBizPlanBomDetailColumns: JVxeColumn[] = [
     {
-      title: '主表ID',
-      key: 'pid',
-      type: JVxeTypes.input,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
-    {
-      title: '标准BOM',
+      title: 'BOM编码',
       key: 'bomCode',
       type: JVxeTypes.input,
-      width:"200px",
+      width:"150px",
       placeholder: '请输入${title}',
       defaultValue:'',
     },
+  {
+    title: '货品',
+    key: 'productionMaterialCode',
+    type: JVxeTypes.selectSearch,
+    dictCode:'CurrentMaterial',
+    width: "350px",
+    placeholder: '请输入${title}',
+    defaultValue: '',
+    disabled:true,
+    validateRules: [{required: true, message: '${title}不能为空'}],
+  },
     {
       title: '物料',
       key: 'materialCode',
-      type: JVxeTypes.input,
-      width:"200px",
+      type: JVxeTypes.selectSearch,
+      dictCode:'CurrentMaterial',
+      width: "350px",
       placeholder: '请输入${title}',
-      defaultValue:'',
+      defaultValue: '',
+      disabled:true,
+      validateRules: [{required: true, message: '${title}不能为空'}],
     },
-    {
-      title: '单位',
-      key: 'unit',
-      type: JVxeTypes.input,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
-    {
-      title: '规格',
-      key: 'specifications',
-      type: JVxeTypes.input,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
+  {
+    title: '单位',
+    key: 'unit',
+    type: JVxeTypes.selectSearch,
+    options: [],
+    dictCode: "dict_materials_unit",
+    width: "100px",
+    placeholder: '请输入${title}',
+    defaultValue: '',
+    disabled: true
+  },
+  {
+    title: '规格',
+    key: 'specifications',
+    type: JVxeTypes.input,
+    width: "200px",
+    placeholder: '请输入${title}',
+    defaultValue: '',
+    disabled: true
+  },
+  {
+    title: '用量',
+    key: 'standardQty',
+    type: JVxeTypes.inputNumber,
+    width:"100px",
+    placeholder: '请输入${title}',
+    defaultValue:'',
+    validateRules: [{required: true, message: '${title}不能为空'}],
+    disabled: true
+  },
     {
       title: '需求数',
       key: 'requiredQty',
       type: JVxeTypes.inputNumber,
-      width:"200px",
+      width:"100px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      validateRules: [{required: true, message: '${title}不能为空'}],
     },
     {
       title: '库存数',
       key: 'stockQty',
       type: JVxeTypes.inputNumber,
-      width:"200px",
+      width:"100px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      disabled:true,
     },
     {
       title: '在途数',
       key: 'inTransitQty',
       type: JVxeTypes.inputNumber,
-      width:"200px",
+      width:"100px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      disabled:true,
     },
     {
       title: '可用数',
       key: 'availableQty',
       type: JVxeTypes.inputNumber,
-      width:"200px",
+      width:"100px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      disabled:true,
     },
     {
       title: '备注',
       key: 'remark',
       type: JVxeTypes.input,
-      width:"200px",
+      width:"300px",
       placeholder: '请输入${title}',
       defaultValue:'',
     },

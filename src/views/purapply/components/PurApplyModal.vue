@@ -11,7 +11,7 @@
           :loading="purApplyDetailTable.loading"
           :columns="purApplyDetailTable.columns"
           :dataSource="purApplyDetailTable.dataSource"
-          :height="340"
+          :height="auto"
           :rowNumber="true"
           :rowSelection="true"
           :disabled="formDisabled"

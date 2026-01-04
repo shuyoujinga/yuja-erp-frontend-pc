@@ -47,7 +47,6 @@
     })
     //表单配置
     const [registerForm, {setProps,resetFields, setFieldsValue, validate}] = useForm({
-        labelWidth: 150,
         schemas: formSchema,
         showActionButtonGroup: false,
         baseColProps: {span: 24}

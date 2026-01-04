@@ -161,23 +161,15 @@ export const yujiakejiBomDetailColumns: JVxeColumn[] = [
   {
     title: '物料编码',
     key: 'materialCode',
-    type: JVxeTypes.select,
+    type: JVxeTypes.selectSearch,
     options: [],
-    dictCode: "CurrentMaterial,material_code  not  like 'C%'",
+    dictCode: "CurrentMaterial",
     width: "350px",
     placeholder: '请输入${title}',
     defaultValue: '',
     validateRules: [{ required: true, message: '${title}不能为空' }],
   },
-  {
-    title: '规格',
-    key: 'specifications',
-    type: JVxeTypes.input,
-    width: "200px",
-    placeholder: '请输入${title}',
-    defaultValue: '',
-    disabled:true
-  },
+
   {
     title: '单位',
     key: 'unit',
@@ -190,9 +182,27 @@ export const yujiakejiBomDetailColumns: JVxeColumn[] = [
     disabled:true
   },
   {
+    title: '规格',
+    key: 'specifications',
+    type: JVxeTypes.input,
+    width: "200px",
+    placeholder: '请输入${title}',
+    defaultValue: '',
+    disabled:true
+  },
+  {
+    title: '用量',
+    key: 'qty',
+    type: JVxeTypes.inputNumber,
+    width: "100px",
+    placeholder: '请输入${title}',
+    defaultValue: '',
+    validateRules: [{ required: true, message: '${title}不能为空' }],
+  },
+  {
     title: '单价',
     key: 'unitPrice',
-    type: JVxeTypes.input,
+    type: JVxeTypes.inputNumber,
     width: "100px",
     placeholder: '请输入${title}',
     defaultValue: '',

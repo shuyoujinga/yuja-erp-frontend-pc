@@ -11,7 +11,7 @@
           :loading="salReturnDetailTable.loading"
           :columns="salReturnDetailTable.columns"
           :dataSource="salReturnDetailTable.dataSource"
-          :height="340"
+          :height="auto"
           :rowNumber="true"
           :rowSelection="true"
           :disabled="formDisabled"

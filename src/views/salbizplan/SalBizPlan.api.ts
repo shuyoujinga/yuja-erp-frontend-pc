@@ -13,7 +13,15 @@ enum Api {
   exportXls = '/salbizplan/salBizPlan/exportXls',
   salBizPlanDetailList = '/salbizplan/salBizPlan/querySalBizPlanDetailByMainId',
   salBizPlanBomDetailList = '/salbizplan/salBizPlan/querySalBizPlanBomDetailByMainId',
+  salBizPlanDetailListByIds = '/salbizplan/salBizPlan/querySalBizPlanDetailByTargetId',
+  salBizPlanBomDetailListByIds = '/salbizplan/salBizPlan/querySalBizPlanBomDetailByTargetId',
+  audit = '/salbizplan/salBizPlan/audit',
 }
+/**
+ * 审核/反审URL
+ * @param params
+ */
+export const getAuditUrl = Api.audit;
 /**
  * 导出api
  * @param params
@@ -34,6 +42,17 @@ export const salBizPlanDetailList = Api.salBizPlanDetailList;
  * @param params
  */
 export const salBizPlanBomDetailList = Api.salBizPlanBomDetailList;
+/**
+ * 查询子表数据
+ * @param params
+ */
+export const salBizPlanDetailListByIds = Api.salBizPlanDetailListByIds;
+/**
+ * 查询子表数据
+ * @param params
+ */
+export const salBizPlanBomDetailListByIds = Api.salBizPlanBomDetailListByIds;
+
 /**
  * 列表接口
  * @param params

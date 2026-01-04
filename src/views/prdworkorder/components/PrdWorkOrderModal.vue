@@ -11,7 +11,7 @@
           :loading="prdWorkOrderDetailTable.loading"
           :columns="prdWorkOrderDetailTable.columns"
           :dataSource="prdWorkOrderDetailTable.dataSource"
-          :height="340"
+          :height="auto"
           :rowNumber="true"
           :rowSelection="true"
           :disabled="formDisabled"

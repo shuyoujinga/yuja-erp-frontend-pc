@@ -11,7 +11,7 @@
           :loading="invMaterialVoucherDetailTable.loading"
           :columns="invMaterialVoucherDetailTable.columns"
           :dataSource="invMaterialVoucherDetailTable.dataSource"
-          :height="340"
+          :height="auto"
           :rowNumber="true"
           :rowSelection="true"
           :disabled="formDisabled"

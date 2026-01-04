@@ -22,7 +22,7 @@
       socketReload
       socketKey="demo-socket-reload"
       :reloadEffect="reloadEffect"
-      :height="340"
+      :height="auto"
       :loading="loading"
       :columns="columns"
       :dataSource="dataSource"

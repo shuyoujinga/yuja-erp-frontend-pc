@@ -12,7 +12,7 @@
               :loading="salReceiptDetailTable.loading"
               :columns="salReceiptDetailTable.columns"
               :dataSource="salReceiptDetailTable.dataSource"
-              :height="340"
+              :height="auto"
               :rowNumber="true"
               :rowSelection="true"
               :disabled="formDisabled"

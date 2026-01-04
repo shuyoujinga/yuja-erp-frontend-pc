@@ -12,7 +12,7 @@
               :loading="purOrderDetailTable.loading"
               :columns="purOrderDetailTable.columns"
               :dataSource="purOrderDetailTable.dataSource"
-              :height="340"
+              :height="auto"
               :rowNumber="true"
               :rowSelection="true"
               :disabled="formDisabled"

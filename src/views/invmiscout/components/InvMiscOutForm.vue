@@ -12,7 +12,7 @@
               :loading="invMiscOutDetailTable.loading"
               :columns="invMiscOutDetailTable.columns"
               :dataSource="invMiscOutDetailTable.dataSource"
-              :height="340"
+              :height="auto"
               :rowNumber="true"
               :rowSelection="true"
               :disabled="formDisabled"

@@ -11,7 +11,7 @@
           :loading="salDeliveryDetailTable.loading"
           :columns="salDeliveryDetailTable.columns"
           :dataSource="salDeliveryDetailTable.dataSource"
-          :height="340"
+          :height="auto"
           :rowNumber="true"
           :rowSelection="true"
           :disabled="formDisabled"

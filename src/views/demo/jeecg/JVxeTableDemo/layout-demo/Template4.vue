@@ -11,7 +11,7 @@
           highlightCurrentRow
           :radioConfig="{ highlight: false }"
           :checkboxConfig="{ highlight: false }"
-          :height="340"
+          :height="auto"
           :loading="table1.loading"
           :columns="table1.columns"
           :dataSource="table1.dataSource"
@@ -44,7 +44,7 @@
           highlightCurrentRow
           :radioConfig="{ highlight: false }"
           :checkboxConfig="{ highlight: false }"
-          :height="340"
+          :height="auto"
           :columns="table1.columns"
           :dataSource="table1.selectedRows"
           style="margin: 52px 0 8px"

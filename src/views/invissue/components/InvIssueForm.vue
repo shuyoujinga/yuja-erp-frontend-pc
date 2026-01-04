@@ -12,7 +12,7 @@
               :loading="invIssueDetailTable.loading"
               :columns="invIssueDetailTable.columns"
               :dataSource="invIssueDetailTable.dataSource"
-              :height="340"
+              :height="auto"
               :rowNumber="true"
               :rowSelection="true"
               :disabled="formDisabled"

@@ -16,6 +16,7 @@ enum Api {
   getCategoryData = '/sys/category/loadAllData',
   getStockMaterial = '/sys/commons/queryByMaterialCode/',
   getStockMaterialInSale = '/sys/commons/queryByMaterialCodeInSale/',
+  getMaterialInfoAndBomList = '/sys/commons/queryByMaterialInfoAndBomList/',
 }
 
 
@@ -28,6 +29,16 @@ export const getStockMaterialInSale = (materialCode) => {
     url: Api.getStockMaterialInSale,
     params: { materialCode }
   });};
+/**
+ * 根据物料编码查询物料
+ * @param materialCode 物料编码
+ */
+export const getMaterialInfoAndBomList = (materialCode) => {
+  return defHttp.get({
+    url: Api.getMaterialInfoAndBomList,
+    params: { materialCode }
+  });};
+
 /**
  * 根据物料编码查询物料
  * @param materialCode 物料编码

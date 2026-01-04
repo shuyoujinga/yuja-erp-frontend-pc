@@ -11,7 +11,7 @@
           :loading="purSupplierQuotationDetailTable.loading"
           :columns="purSupplierQuotationDetailTable.columns"
           :dataSource="purSupplierQuotationDetailTable.dataSource"
-          :height="340"
+          :height="auto"
           :rowNumber="true"
           :rowSelection="true"
           :disabled="formDisabled"
