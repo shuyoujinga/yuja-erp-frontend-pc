@@ -1,6 +1,6 @@
 <template>
-  <BasicModal v-bind="$attrs" @register="registerModal" destroyOnClose :title="title" :width="896" @ok="handleSubmit">
-      <BasicForm @register="registerForm" ref="formRef"/>
+  <BasicModal v-bind="$attrs" @register="registerModal" destroyOnClose :title="title" :width="1200" @ok="handleSubmit">
+      <BasicForm @register="registerForm" ref="formRef" @valuesChange="handleFormChange" />
   <!-- 子表单区域 -->
     <a-tabs v-model:activeKey="activeKey" animated @change="handleChangeTabs">
       <a-tab-pane tab="销售发货_明细" key="salDeliveryDetail" :forceRender="true">
@@ -29,8 +29,7 @@
     import { JVxeTable } from '/@/components/jeecg/JVxeTable'
     import { useJvxeMethod } from '/@/hooks/system/useJvxeMethods.ts'
     import {formSchema,salDeliveryDetailColumns} from '../SalDelivery.data';
-    import {saveOrUpdate,salDeliveryDetailList} from '../SalDelivery.api';
-    import { VALIDATE_FAILED } from '/@/utils/common/vxeUtils'
+    import {saveOrUpdate,salDeliveryDetailList,salDeliveryDetailListByIds} from '../SalDelivery.api';
     // Emits声明
     const emit = defineEmits(['register','success']);
     const isUpdate = ref(true);
@@ -100,6 +99,15 @@
             setModalProps({confirmLoading: false});
         }
     }
+    function  handleFormChange(changedValues){
+      // 编辑态初始化阶段，直接忽略 isTax 的联动
+      if (changedValues.orderDetailIds !== undefined) {
+        // 直接加载明细
+        requestSubTableData(salDeliveryDetailListByIds, {id: `${changedValues.orderDetailIds}`}, salDeliveryDetailTable);
+
+      }
+    }
+
 </script>
 
 <style lang="less" scoped>

@@ -1,14 +1,19 @@
 import {BasicColumn} from '/@/components/Table';
 import {FormSchema} from '/@/components/Table';
-import { rules} from '/@/utils/helper/validator';
-import { render } from '/@/utils/common/renderUtils';
 import {JVxeTypes,JVxeColumn} from '/@/components/jeecg/JVxeTable/types'
+import {h} from "vue";
 //列表数据
 export const columns: BasicColumn[] = [
    {
     title: '出货单号',
     align:"center",
-    dataIndex: 'docCode'
+    dataIndex: 'docCode',
+     customRender: ({record}) => {
+       return h('a', {
+         style: {color: '#1890ff', cursor: 'pointer'},
+         onClick: () => window?.handleDetail?.(record) && record, // 下面会注册
+       }, record.docCode,);
+     }
    },
    {
     title: '制单日期',
@@ -24,15 +29,15 @@ export const columns: BasicColumn[] = [
     dataIndex: 'orderCodes'
    },
    {
-    title: '销售订单_IDS',
-    align:"center",
-    dataIndex: 'orderIds'
-   },
-   {
     title: '运费类型',
     align:"center",
-    dataIndex: 'freightType'
+    dataIndex: 'freightType_dictText'
    },
+  {
+    title: '金额合计',
+    align:"center",
+    dataIndex: 'amount'
+  },
    {
     title: '客户',
     align:"center",
@@ -72,8 +77,7 @@ export const searchFormSchema: FormSchema[] = [
 	{
       label: "出货单号",
       field: "docCode",
-      component: 'Input',
-      //colProps: {span: 6},
+      component: 'JInput',
  	},
      {
       label: "制单日期",
@@ -82,27 +86,23 @@ export const searchFormSchema: FormSchema[] = [
       componentProps: {
           valueType: 'Date',
       },
-      //colProps: {span: 6},
 	},
-	{
-      label: "销售订单",
-      field: "orderCodes",
-      component: 'Input',
-      //colProps: {span: 6},
- 	},
-	{
-      label: "客户",
-      field: "customerCode",
-      component: 'Input',
-      //colProps: {span: 6},
- 	},
+  {
+    label: "客户",
+    field: "customerCode",
+    component: 'JSearchSelect',
+    componentProps: {
+      dict: "CurrentCustomer"
+    }
+  },
 ];
 //表单数据
 export const formSchema: FormSchema[] = [
   {
     label: '出货单号',
-         field: 'docCode',
-    component: 'Input',dynamicDisabled:true 
+    field: 'docCode',
+    component: 'Input',
+    dynamicDisabled:true
   },
   {
     label: '制单日期',
@@ -118,51 +118,63 @@ export const formSchema: FormSchema[] = [
       ];
     },
     defaultValue: new Date()},
+
+  {
+    label: '客户',
+    field: 'customerCode',
+    component: 'JSearchSelect',
+    componentProps: {
+      dict: "CurrentCustomer"
+    },
+    dynamicRules: ({model, schema}) => {
+      return [
+        {required: true, message: '请输入客户!'},
+      ];
+    },
+  },
+
   {
     label: '销售订单',
     field: 'orderCodes',
-    component: 'Input',
+    component: 'JPopup',
+    componentProps: ({formActionType,formModel}) => {
+      const {setFieldsValue} = formActionType;
+      return {
+        setFieldsValue: setFieldsValue,
+        code: "report_sal_order",
+        fieldConfig: [
+          {source: 'doc_code', target: 'orderCodes'},
+          {source: 'id', target: 'orderIds'},
+          {source: 'detail_id', target: 'orderDetailIds'},
+        ],
+        multi: true,
+        param: {customer_code: `'${formModel.customerCode}'`}
+      }
+    },
+    dynamicRules: ({model, schema}) => {
+      return [
+        {required: true, message: '请选择销售订单!'},
+      ];
+    },
   },
   {
-    label: '销售订单_IDS',
-    field: 'orderIds',
-    component: 'Input',
+    label: '金额合计',
+    field: 'amount',
+    component: 'InputNumber',
+    dynamicDisabled: true
   },
   {
     label: '运费类型',
     field: 'freightType',
-    component: 'InputNumber',
-  },
-  {
-    label: '客户',
-    field: 'customerCode',
-    component: 'Input',
-  },
-  {
-    label: '状态',
-    field: 'status',
-    component: 'JDictSelectTag',
-    componentProps:{
-        dictCode:""
-     },
-  },
-  {
-    label: '审核状态',
-    field: 'audit',
-    component: 'JDictSelectTag',
-    componentProps:{
-        dictCode:""
-     },
-  },
-  {
-    label: '审批人',
-    field: 'auditBy',
-    component: 'Input',
-  },
-  {
-    label: '审批时间',
-    field: 'auditTime',
-    component: 'DatePicker',
+    component: 'JSearchSelect',
+    componentProps: {
+      dict: "dict_freight_type"
+    },
+    dynamicRules: ({model, schema}) => {
+      return [
+        {required: true, message: '请选择运费类型!'},
+      ];
+    }
   },
   {
     label: '备注',
@@ -176,97 +188,150 @@ export const formSchema: FormSchema[] = [
 	  component: 'Input',
 	  show: false
 	},
+  {
+    label: '销售订单_IDS',
+    field: 'orderIds',
+    component: 'Input',
+    show: false
+  },{
+    label: '销售订单明细_IDS',
+    field: 'orderDetailIds',
+    component: 'Input',
+    show: false
+  }
+
 ];
 //子表单数据
 //子表表格配置
 export const salDeliveryDetailColumns: JVxeColumn[] = [
-    {
-      title: '主表ID',
-      key: 'pid',
-      type: JVxeTypes.input,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
-    {
-      title: '明细表ID',
-      key: 'orderDetailId',
-      type: JVxeTypes.input,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
-    {
-      title: '货品',
-      key: 'materialCode',
-      type: JVxeTypes.input,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
-    {
-      title: '单位',
-      key: 'unit',
-      type: JVxeTypes.input,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
-    {
-      title: '规格',
-      key: 'specifications',
-      type: JVxeTypes.input,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
+  {
+    title: '货品',
+    key: 'materialCode',
+    type: JVxeTypes.selectSearch,
+    dictCode:'CurrentProduction',
+    width: "350px",
+    placeholder: '请输入${title}',
+    defaultValue: '',
+    disabled:true,
+    validateRules: [{required: true, message: '${title}不能为空'}],
+  },
+  {
+    title: '单位',
+    key: 'unit',
+    type: JVxeTypes.selectSearch,
+    options: [],
+    dictCode: "dict_materials_unit",
+    width: "100px",
+    placeholder: '请输入${title}',
+    defaultValue: '',
+    disabled: true
+  },
+  {
+    title: '规格',
+    key: 'specifications',
+    type: JVxeTypes.input,
+    width: "200px",
+    placeholder: '请输入${title}',
+    defaultValue: '',
+    disabled: true
+  },
+  {
+    title: '库存数量',
+    key: 'stockQty',
+    type: JVxeTypes.inputNumber,
+    width: "100px",
+    placeholder: '请输入${title}',
+    defaultValue: '',
+    disabled: true
+  },
     {
       title: '订单数',
       key: 'orderQty',
       type: JVxeTypes.inputNumber,
-      width:"200px",
+      width:"100px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      disabled: true
     },
     {
       title: '发货数',
       key: 'qty',
       type: JVxeTypes.inputNumber,
-      width:"200px",
+      width:"150px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      validateRules: [{required: true, message: '${title}不能为空'} ,
+        {
+          handler({ cellValue, row }, callback) {
+            const stockQty = Number(row.stockQty || 0)
+            const shipQty = Number(cellValue || 0)
+
+            // ① 库存为 0，直接禁止
+            if (stockQty === 0) {
+              row.amount = 0
+              callback(false, '库存为0，不允许发货')
+              return
+            }
+
+            // ② 发货数大于库存
+            if (shipQty > stockQty) {
+              row.amount = 0
+              callback(false, '库存不足，不允许发货')
+              return
+            }
+
+            // ③ 金额计算（通过校验后才算）
+            const unitPrice = Number(row.unitPrice || 0)
+
+            let discountRate = Number(row.discountRate)
+            if (!discountRate || discountRate <= 0) {
+              discountRate = 1
+            }
+
+            // === 四舍五入处理（保留 2 位小数）===
+            const rawAmount = shipQty * unitPrice * discountRate
+            row.amount = Math.round(rawAmount * 100) / 100
+
+            callback(true)
+          }
+        }
+      ],
     },
+  {
+    title: '件数',
+    key: 'pieceQty',
+    type: JVxeTypes.inputNumber,
+    width:"100px",
+    placeholder: '请输入${title}',
+    defaultValue:'',
+  },
     {
       title: '单价',
       key: 'unitPrice',
       type: JVxeTypes.inputNumber,
-      width:"200px",
+      width:"100px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      disabled: true
     },
-    {
-      title: '件数',
-      key: 'pieceQty',
-      type: JVxeTypes.inputNumber,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
+
     {
       title: '折扣',
       key: 'discountRate',
       type: JVxeTypes.inputNumber,
-      width:"200px",
+      width:"100px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      disabled: true
     },
     {
       title: '金额',
       key: 'amount',
       type: JVxeTypes.inputNumber,
-      width:"200px",
+      width:"100px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      disabled: true
     },
     {
       title: '备注',
