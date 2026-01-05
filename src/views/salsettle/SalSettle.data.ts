@@ -179,7 +179,7 @@ export const formSchema: FormSchema[] = [
       const {setFieldsValue} = formActionType;
       return {
         setFieldsValue: setFieldsValue,
-        code: "report_sal_order",
+        code: "report_sal_return",
         fieldConfig: [
           {source: 'doc_code', target: 'returnCodes'},
           {source: 'id', target: 'returnIds'},

@@ -1,5 +1,5 @@
 <template>
-  <BasicModal v-bind="$attrs" @register="registerModal" destroyOnClose :title="title" :width="896" @ok="handleSubmit">
+  <BasicModal v-bind="$attrs" @register="registerModal" destroyOnClose :title="title" :width="1500" @ok="handleSubmit">
       <BasicForm @register="registerForm" ref="formRef"/>
   <!-- 子表单区域 -->
     <a-tabs v-model:activeKey="activeKey" animated @change="handleChangeTabs">
@@ -16,6 +16,7 @@
           :rowSelection="true"
           :disabled="formDisabled"
           :toolbar="true"
+          @valueChange="handleValueChange"
           />
       </a-tab-pane>
     </a-tabs>
@@ -30,7 +31,7 @@
     import { useJvxeMethod } from '/@/hooks/system/useJvxeMethods.ts'
     import {formSchema,salReturnDetailColumns} from '../SalReturn.data';
     import {saveOrUpdate,salReturnDetailList} from '../SalReturn.api';
-    import { VALIDATE_FAILED } from '/@/utils/common/vxeUtils'
+    import {getMaterialByCodeApi} from "@/views/bom/YujiakejiBom.api";
     // Emits声明
     const emit = defineEmits(['register','success']);
     const isUpdate = ref(true);
@@ -99,6 +100,55 @@
         } finally {
             setModalProps({confirmLoading: false});
         }
+    }
+    function handleValueChange({ row, column, value }) {
+      if (column.key === 'materialCode' && value) {
+        getMaterialByCodeApi(value).then(res => {
+          if (res) {
+            const material = res;
+            row.specifications = material.specifications;
+            row.unit = material.unit;
+          } else {
+            row.specifications = '';
+            row.code = '';
+            row.unit = '';
+            row.unit_price = 0;
+          }
+        });
+        console.log(row)
+      }
+      // 数量变化 → 金额 = 数量 × 单价
+      if (column.key === 'qty') {
+        const qty = Number(value) || 0;
+        const unitPrice = Number(row.unitPrice) || 0;
+
+        const amount = qty * unitPrice;
+        row.amount = Math.round(amount * 100) / 100;
+        return;
+      }
+
+      // 单价变化 → 金额 = 数量 × 单价
+      if (column.key === 'unitPrice') {
+        const qty = Number(row.qty) || 0;
+        const unitPrice = Number(value) || 0;
+
+        const amount = qty * unitPrice;
+        row.amount = Math.round(amount * 100) / 100;
+        return;
+      }
+
+      // 金额变化 → 单价 = 金额 ÷ 数量
+      if (column.key === 'amount') {
+        const amount = Number(value) || 0;
+        const qty = Number(row.qty) || 0;
+
+        if (qty !== 0) {
+          const unitPrice = amount / qty;
+          row.unitPrice = Math.round(unitPrice * 100) / 100;
+        } else {
+          row.unitPrice = 0;
+        }
+      }
     }
 </script>
 

@@ -12,7 +12,13 @@ enum Api {
   importExcel = '/salreturn/salReturn/importExcel',
   exportXls = '/salreturn/salReturn/exportXls',
   salReturnDetailList = '/salreturn/salReturn/querySalReturnDetailByMainId',
+  audit = '/salreturn/salReturn/audit',
 }
+/**
+ * 审核/反审URL
+ * @param params
+ */
+export const getAuditUrl = Api.audit;
 /**
  * 导出api
  * @param params
