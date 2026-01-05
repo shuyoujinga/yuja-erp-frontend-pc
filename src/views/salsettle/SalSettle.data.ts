@@ -166,7 +166,7 @@ export const formSchema: FormSchema[] = [
     },
     dynamicRules: ({model, schema}) => {
       return [
-        {required: true, message: '请选择销售订单!'},
+        {required: true, message: '请选择销售发货单!'},
       ];
     }
   },
@@ -190,11 +190,7 @@ export const formSchema: FormSchema[] = [
         param: {customer_code: `'${formModel.customerCode}'`}
       }
     },
-    dynamicRules: ({model, schema}) => {
-      return [
-        {required: true, message: '请选择销售订单!'},
-      ];
-    }
+
   },
 
   {

@@ -1,6 +1,6 @@
 <template>
-  <BasicModal v-bind="$attrs" @register="registerModal" destroyOnClose :title="title" :width="896" @ok="handleSubmit">
-      <BasicForm @register="registerForm" ref="formRef"/>
+  <BasicModal v-bind="$attrs" @register="registerModal" destroyOnClose :title="title" :width="1500" @ok="handleSubmit">
+      <BasicForm @register="registerForm" ref="formRef" @valuesChange="handleFormChange" />
   <!-- 子表单区域 -->
     <a-tabs v-model:activeKey="activeKey" animated @change="handleChangeTabs">
       <a-tab-pane tab="销售收款_明细" key="salReceiptDetail" :forceRender="true">
@@ -29,8 +29,8 @@
     import { JVxeTable } from '/@/components/jeecg/JVxeTable'
     import { useJvxeMethod } from '/@/hooks/system/useJvxeMethods.ts'
     import {formSchema,salReceiptDetailColumns} from '../SalReceipt.data';
-    import {saveOrUpdate,salReceiptDetailList} from '../SalReceipt.api';
-    import { VALIDATE_FAILED } from '/@/utils/common/vxeUtils'
+    import {saveOrUpdate, salReceiptDetailList, salReceiptDetailListByIds} from '../SalReceipt.api';
+
     // Emits声明
     const emit = defineEmits(['register','success']);
     const isUpdate = ref(true);
@@ -45,7 +45,7 @@
           columns:salReceiptDetailColumns
     })
     //表单配置
-    const [registerForm, {setProps,resetFields, setFieldsValue, validate}] = useForm({
+    const [registerForm, {setProps,resetFields, setFieldsValue,getFieldsValue, validate}] = useForm({
         //labelWidth: 150,
         schemas: formSchema,
         showActionButtonGroup: false,
@@ -99,6 +99,59 @@
         } finally {
             setModalProps({confirmLoading: false});
         }
+    }
+
+    function handleFormChange(changedValues) {
+
+      if (changedValues.settleDetailIds !== undefined) {
+        const { settleAmountDetail } = changedValues;
+        requestSubTableData(
+          salReceiptDetailListByIds,
+          { id: `${changedValues.settleDetailIds}` },
+          salReceiptDetailTable
+        );
+
+        if (settleAmountDetail) {
+          const deliveryAmount = settleAmountDetail
+            .split(',')
+            .map(v => Number(v))
+            .filter(v => !Number.isNaN(v))
+            .reduce((sum, v) => sum + v, 0);
+
+          // 保留 2 位精度，且仍然是 Number
+          const finalAmount = Math.round(deliveryAmount * 100) / 100;
+          const { prepayAmount = 0 } = getFieldsValue();
+          // 赋值（根据你实际表单 API 调整）
+          setFieldsValue({
+            amount:round(finalAmount-prepayAmount),
+            settleAmount: finalAmount
+          });
+        }}
+
+      if (changedValues.prepayIds !== undefined) {
+        const { prepayAmountDetail } = changedValues;
+
+        if (prepayAmountDetail) {
+          const prepayAmount = prepayAmountDetail
+            .split(',')
+            .map(v => Number(v))
+            .filter(v => !Number.isNaN(v))
+            .reduce((sum, v) => sum + v, 0);
+          const { settleAmount = 0 } = getFieldsValue();
+          // 保留 2 位精度，且仍然是 Number
+          const finalAmount = Math.round(prepayAmount * 100) / 100;
+
+          // 赋值（根据你实际表单 API 调整）
+          setFieldsValue({
+            amount:round(settleAmount-finalAmount),
+            prepayAmount: finalAmount
+          });
+        }
+      }
+    }
+    function round(num, scale = 2) {
+      const factor = Math.pow(10, scale)
+      return Math.round((Number(num) || 0) * factor) / factor
     }
 </script>
 

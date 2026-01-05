@@ -12,7 +12,14 @@ enum Api {
   importExcel = '/salreceipt/salReceipt/importExcel',
   exportXls = '/salreceipt/salReceipt/exportXls',
   salReceiptDetailList = '/salreceipt/salReceipt/querySalReceiptDetailByMainId',
+  salReceiptDetailListByIds= '/salreceipt/salReceipt/querySalReceiptDetailByTargetId',
+  audit = '/salreceipt/salReceipt/audit',
 }
+/**
+ * 审核/反审URL
+ * @param params
+ */
+export const getAuditUrl = Api.audit;
 /**
  * 导出api
  * @param params
@@ -28,6 +35,13 @@ export const getImportUrl = Api.importExcel;
  * @param params
  */
 export const salReceiptDetailList = Api.salReceiptDetailList;
+
+/**
+ * 查询子表数据
+ * @param params
+ */
+export const salReceiptDetailListByIds = Api.salReceiptDetailListByIds;
+
 /**
  * 列表接口
  * @param params
