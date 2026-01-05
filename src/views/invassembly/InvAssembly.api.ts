@@ -12,7 +12,14 @@ enum Api {
   importExcel = '/invassembly/invAssembly/importExcel',
   exportXls = '/invassembly/invAssembly/exportXls',
   invAssemblyDetailList = '/invassembly/invAssembly/queryInvAssemblyDetailByMainId',
+  invAssemblyBomDetailList = '/invassembly/invAssembly/queryInvAssemblyBomDetailByMainId',
+  audit='/invassembly/invAssembly/audit',
 }
+/**
+ * 导出api
+ * @param params
+ */
+export const getAuditUrl = Api.audit;
 /**
  * 导出api
  * @param params
@@ -28,6 +35,11 @@ export const getImportUrl = Api.importExcel;
  * @param params
  */
 export const invAssemblyDetailList = Api.invAssemblyDetailList;
+/**
+ * 查询子表数据
+ * @param params
+ */
+export const invAssemblyBomDetailList = Api.invAssemblyBomDetailList;
 /**
  * 列表接口
  * @param params

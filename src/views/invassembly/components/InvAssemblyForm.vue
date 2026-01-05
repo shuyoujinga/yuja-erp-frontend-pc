@@ -12,7 +12,23 @@
               :loading="invAssemblyDetailTable.loading"
               :columns="invAssemblyDetailTable.columns"
               :dataSource="invAssemblyDetailTable.dataSource"
-              :height="auto"
+              :height="340"
+              :rowNumber="true"
+              :rowSelection="true"
+              :disabled="formDisabled"
+              :toolbar="true"
+            />
+          </a-tab-pane>
+          <a-tab-pane tab="组装单_材料明细" key="invAssemblyBomDetail" :forceRender="true">
+            <JVxeTable
+              keep-source
+              resizable
+              ref="invAssemblyBomDetail"
+              v-if="invAssemblyBomDetailTable.show"
+              :loading="invAssemblyBomDetailTable.loading"
+              :columns="invAssemblyBomDetailTable.columns"
+              :dataSource="invAssemblyBomDetailTable.dataSource"
+              :height="340"
               :rowNumber="true"
               :rowSelection="true"
               :disabled="formDisabled"
@@ -35,8 +51,8 @@
   import { propTypes } from '/@/utils/propTypes';
   import { useJvxeMethod } from '/@/hooks/system/useJvxeMethods';
   import { VALIDATE_FAILED } from '/@/utils/common/vxeUtils';
-  import {getBpmFormSchema,invAssemblyDetailColumns} from '../InvAssembly.data';
-  import {saveOrUpdate,invAssemblyDetailList} from '../InvAssembly.api';
+  import {getBpmFormSchema,invAssemblyDetailColumns,invAssemblyBomDetailColumns} from '../InvAssembly.data';
+  import {saveOrUpdate,invAssemblyDetailList,invAssemblyBomDetailList} from '../InvAssembly.api';
 
   export default defineComponent({
     name: "InvAssemblyForm",
@@ -62,14 +78,21 @@
         return true;
       });
 
-      const refKeys = ref(['invAssemblyDetail', ]);
+      const refKeys = ref(['invAssemblyDetail', 'invAssemblyBomDetail', ]);
       const activeKey = ref('invAssemblyDetail');
       const invAssemblyDetail = ref();
-      const tableRefs = {invAssemblyDetail, };
+      const invAssemblyBomDetail = ref();
+      const tableRefs = {invAssemblyDetail, invAssemblyBomDetail, };
       const invAssemblyDetailTable = reactive({
         loading: false,
         dataSource: [],
         columns:invAssemblyDetailColumns,
+        show: false
+      })
+      const invAssemblyBomDetailTable = reactive({
+        loading: false,
+        dataSource: [],
+        columns:invAssemblyBomDetailColumns,
         show: false
       })
 
@@ -80,6 +103,7 @@
         return {
           ...main, // 展开
           invAssemblyDetailList: allValues.tablesValue[0].tableData,
+          invAssemblyBomDetailList: allValues.tablesValue[1].tableData,
         }
       }
 
@@ -97,6 +121,9 @@
         requestSubTableData(invAssemblyDetailList, {id: data.id}, invAssemblyDetailTable, ()=>{
           invAssemblyDetailTable.show = true;
         });
+        requestSubTableData(invAssemblyBomDetailList, {id: data.id}, invAssemblyBomDetailTable, ()=>{
+          invAssemblyBomDetailTable.show = true;
+        });
         //默认是禁用
         await setProps({disabled: formDisabled.value})
       }
@@ -111,7 +138,9 @@
         activeKey,
         handleChangeTabs,
         invAssemblyDetail,
+        invAssemblyBomDetail,
         invAssemblyDetailTable,
+        invAssemblyBomDetailTable,
       }
     }
   });
