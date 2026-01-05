@@ -1,14 +1,19 @@
 import {BasicColumn} from '/@/components/Table';
 import {FormSchema} from '/@/components/Table';
-import { rules} from '/@/utils/helper/validator';
-import { render } from '/@/utils/common/renderUtils';
 import {JVxeTypes,JVxeColumn} from '/@/components/jeecg/JVxeTable/types'
+import {h} from "vue";
 //列表数据
 export const columns: BasicColumn[] = [
    {
     title: '结算单号',
     align:"center",
-    dataIndex: 'docCode'
+    dataIndex: 'docCode' ,
+     customRender: ({record}) => {
+       return h('a', {
+         style: {color: '#1890ff', cursor: 'pointer'},
+         onClick: () => window?.handleDetail?.(record) && record, // 下面会注册
+       }, record.docCode,);
+     }
    },
    {
     title: '制单日期',
@@ -23,20 +28,11 @@ export const columns: BasicColumn[] = [
     align:"center",
     dataIndex: 'customerCode_dictText'
    },
-   {
-    title: '发货单号_IDS',
-    align:"center",
-    dataIndex: 'deliveryIds'
-   },
+
    {
     title: '发货单号',
     align:"center",
     dataIndex: 'deliveryCodes'
-   },
-   {
-    title: '退货单号_IDS',
-    align:"center",
-    dataIndex: 'returnIds'
    },
    {
     title: '退货单号',
@@ -44,43 +40,45 @@ export const columns: BasicColumn[] = [
     dataIndex: 'returnCodes'
    },
    {
+    title: '发货合计',
+    align:"center",
+    dataIndex: 'deliveryAmount'
+   },
+
+  {
+    title: '退货冲抵',
+    align:"center",
+    dataIndex: 'returnAmount'
+  },
+
+   {
+    title: '结算合计',
+    align:"center",
+    dataIndex: 'amount'
+   },
+  {
+    title: '状态',
+    align:"center",
+    dataIndex: 'status_dictText'
+  },
+  {
     title: '审核状态',
     align:"center",
     dataIndex: 'audit_dictText'
-   },
-   {
+  },
+  {
     title: '审核人',
     align:"center",
     dataIndex: "auditBy_dictText"
-   },
-   {
+  },
+  {
     title: '审核时间',
     align:"center",
     dataIndex: 'auditTime',
     customRender:({text}) =>{
       return !text?"":(text.length>10?text.substr(0,10):text)
     },
-   },
-   {
-    title: '状态',
-    align:"center",
-    dataIndex: 'status'
-   },
-   {
-    title: '结算合计',
-    align:"center",
-    dataIndex: 'settleAmount'
-   },
-   {
-    title: '退货冲抵',
-    align:"center",
-    dataIndex: 'returnAmount'
-   },
-   {
-    title: '金额合计',
-    align:"center",
-    dataIndex: 'amount'
-   },
+  },
    {
     title: '备注',
     align:"center",
@@ -89,13 +87,35 @@ export const columns: BasicColumn[] = [
 ];
 //查询数据
 export const searchFormSchema: FormSchema[] = [
+  {
+    label: "结算单号",
+    field: "docCode",
+    component: 'JInput',
+  },
+  {
+    label: "制单日期",
+    field: "docTime",
+    component: 'RangePicker',
+    componentProps: {
+      valueType: 'Date',
+    },
+  },
+  {
+    label: "客户",
+    field: "customerCode",
+    component: 'JSearchSelect',
+    componentProps: {
+      dict: "CurrentCustomer"
+    }
+  }
 ];
 //表单数据
 export const formSchema: FormSchema[] = [
   {
     label: '结算单号',
-         field: 'docCode',
-    component: 'Input',dynamicDisabled:true 
+    field: 'docCode',
+    component: 'Input',
+    dynamicDisabled:true
   },
   {
     label: '制单日期',
@@ -114,68 +134,129 @@ export const formSchema: FormSchema[] = [
   {
     label: '客户',
     field: 'customerCode',
-    component: 'Input',
+    component: 'JSearchSelect',
+    componentProps: {
+      dict: "CurrentCustomer"
+    },
+    dynamicRules: ({model, schema}) => {
+      return [
+        {required: true, message: '请选择客户!'},
+      ];
+    }
   },
-  {
-    label: '发货单号_IDS',
-    field: 'deliveryIds',
-    component: 'Input',
-  },
+
   {
     label: '发货单号',
     field: 'deliveryCodes',
-    component: 'Input',
+    component: 'JPopup',
+    componentProps: ({formActionType,formModel}) => {
+      const {setFieldsValue} = formActionType;
+      return {
+        setFieldsValue: setFieldsValue,
+        code: "report_sal_delivery",
+        fieldConfig: [
+          {source: 'doc_code', target: 'deliveryCodes'},
+          {source: 'id', target: 'deliveryIds'},
+          {source: 'detail_id', target: 'deliveryDetailIds'},
+          {source: 'detail_amount', target: 'deliveryAmountDetail'},
+        ],
+        multi: true,
+        param: {customer_code: `'${formModel.customerCode}'`}
+      }
+    },
+    dynamicRules: ({model, schema}) => {
+      return [
+        {required: true, message: '请选择销售订单!'},
+      ];
+    }
   },
-  {
-    label: '退货单号_IDS',
-    field: 'returnIds',
-    component: 'Input',
-  },
+
   {
     label: '退货单号',
     field: 'returnCodes',
-    component: 'Input',
+    component: 'JPopup',
+    componentProps: ({formActionType,formModel}) => {
+      const {setFieldsValue} = formActionType;
+      return {
+        setFieldsValue: setFieldsValue,
+        code: "report_sal_order",
+        fieldConfig: [
+          {source: 'doc_code', target: 'returnCodes'},
+          {source: 'id', target: 'returnIds'},
+          {source: 'detail_id', target: 'returnDetailIds'},
+          {source: 'detail_amount', target: 'returnAmountDetail'},
+        ],
+        multi: true,
+        param: {customer_code: `'${formModel.customerCode}'`}
+      }
+    },
+    dynamicRules: ({model, schema}) => {
+      return [
+        {required: true, message: '请选择销售订单!'},
+      ];
+    }
   },
+
   {
-    label: '审核状态',
-    field: 'audit',
+    label: '发货合计',
+    field: 'deliveryAmount',
     component: 'InputNumber',
-  },
-  {
-    label: '审核人',
-    field: 'auditBy',
-    component: 'Input',
-  },
-  {
-    label: '审核时间',
-    field: 'auditTime',
-    component: 'DatePicker',
-  },
-  {
-    label: '状态',
-    field: 'status',
-    component: 'InputNumber',
-  },
-  {
-    label: '结算合计',
-    field: 'settleAmount',
-    component: 'InputNumber',
+    dynamicDisabled:true
   },
   {
     label: '退货冲抵',
     field: 'returnAmount',
     component: 'InputNumber',
+    dynamicDisabled:true
   },
   {
-    label: '金额合计',
+    label: '结算合计',
     field: 'amount',
     component: 'InputNumber',
+    dynamicDisabled:true
   },
   {
     label: '备注',
     field: 'remark',
     component: 'InputTextArea',
   },
+  {
+    label: '退货单号_IDS',
+    field: 'returnIds',
+    component: 'Input',
+    show: false
+  },
+  {
+    label: '退货单号明细_IDS',
+    field: 'returnDetailIds',
+    component: 'Input',
+    show: false
+  },
+  {
+    label: '退货金额',
+    field: 'returnAmountDetail',
+    component: 'Input',
+    show: false
+  },
+  {
+    label: '发货金额',
+    field: 'deliveryAmountDetail',
+    component: 'Input',
+    show: false
+  },
+  {
+    label: '发货单号明细_IDS',
+    field: 'deliveryDetailIds',
+    component: 'Input',
+    show: false
+  },
+  {
+    label: '发货单号_IDS',
+    field: 'deliveryIds',
+    component: 'Input',
+    show: false
+  },
+
 	// TODO 主键隐藏字段，目前写死为ID
 	{
 	  label: '',
@@ -187,93 +268,99 @@ export const formSchema: FormSchema[] = [
 //子表单数据
 //子表表格配置
 export const salSettleDetailColumns: JVxeColumn[] = [
-    {
-      title: '主编ID',
-      key: 'pid',
-      type: JVxeTypes.input,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
-    {
-      title: '结算明细ID',
-      key: 'deliveryDetailId',
-      type: JVxeTypes.input,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
-    {
-      title: '退货明细ID',
-      key: 'returnDetailId',
-      type: JVxeTypes.input,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
-    {
-      title: '货品',
-      key: 'materialCode',
-      type: JVxeTypes.input,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
-    {
-      title: '单位',
-      key: 'unit',
-      type: JVxeTypes.input,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
-    {
-      title: '规格',
-      key: 'specifications',
-      type: JVxeTypes.input,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
+  {
+    title: '货品',
+    key: 'materialCode',
+    type: JVxeTypes.selectSearch,
+    dictCode:'CurrentProduction',
+    width: "350px",
+    placeholder: '请输入${title}',
+    defaultValue: '',
+    disabled:true,
+    validateRules: [{required: true, message: '${title}不能为空'}],
+  },
+  {
+    title: '单位',
+    key: 'unit',
+    type: JVxeTypes.selectSearch,
+    options: [],
+    dictCode: "dict_materials_unit",
+    width: "100px",
+    placeholder: '请输入${title}',
+    defaultValue: '',
+    disabled: true
+  },
+  {
+    title: '规格',
+    key: 'specifications',
+    type: JVxeTypes.input,
+    width: "200px",
+    placeholder: '请输入${title}',
+    defaultValue: '',
+    disabled: true
+  },
     {
       title: '单价',
       key: 'unitPrice',
       type: JVxeTypes.inputNumber,
-      width:"200px",
+      width:"100px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      disabled:true,
     },
     {
       title: '发货数',
       key: 'deliveryQty',
       type: JVxeTypes.inputNumber,
-      width:"200px",
+      width:"100px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      disabled:true,
     },
     {
       title: '发货金额',
       key: 'deliveryAmount',
       type: JVxeTypes.inputNumber,
-      width:"200px",
+      width:"100px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      disabled:true,
     },
     {
       title: '结算数',
       key: 'qty',
       type: JVxeTypes.inputNumber,
-      width:"200px",
+      width:"150px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      validateRules: [{required: true, message: '${title}不能为空'},{
+        handler({ cellValue, row }, callback) {
+          const deliveryQty = Number(row.deliveryQty || 0)
+          const unitPrice = Number(row.unitPrice || 0)
+          const shipQty = Number(cellValue || 0)
+          // ② 发货数大于库存
+          if (shipQty > deliveryQty) {
+            row.amount = 0
+            callback(false, '结算数不可超过发货数!')
+            return
+          }
+          // === 四舍五入处理（保留 2 位小数）===
+          const rawAmount = shipQty * unitPrice
+          row.amount = Math.round(rawAmount * 100) / 100
+
+          callback(true)
+        }
+      }],
     },
     {
       title: '结算金额',
       key: 'amount',
       type: JVxeTypes.inputNumber,
-      width:"200px",
+      width:"150px",
       placeholder: '请输入${title}',
       defaultValue:'',
+      validateRules: [{required: true, message: '${title}不能为空'}],
+      disabled:true,
     },
     {
       title: '备注',
@@ -299,9 +386,9 @@ export const superQuerySchema = {
   auditBy: {title: '审核人',order: 8,view: 'text', type: 'string',},
   auditTime: {title: '审核时间',order: 9,view: 'date', type: 'string',},
   status: {title: '状态',order: 10,view: 'number', type: 'number',},
-  settleAmount: {title: '结算合计',order: 11,view: 'number', type: 'number',},
+  deliveryAmount: {title: '发货合计',order: 11,view: 'number', type: 'number',},
   returnAmount: {title: '退货冲抵',order: 12,view: 'number', type: 'number',},
-  amount: {title: '金额合计',order: 13,view: 'number', type: 'number',},
+  amount: {title: '结算合计',order: 13,view: 'number', type: 'number',},
   remark: {title: '备注',order: 14,view: 'text', type: 'string',},
   //子表高级查询
   salSettleDetail: {

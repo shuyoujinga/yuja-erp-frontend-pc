@@ -12,7 +12,14 @@ enum Api {
   importExcel = '/salsettle/salSettle/importExcel',
   exportXls = '/salsettle/salSettle/exportXls',
   salSettleDetailList = '/salsettle/salSettle/querySalSettleDetailByMainId',
+  salSettleDetailListByIds = '/salsettle/salSettle/querySalSettleDetailByTargetId',
+  audit = '/salsettle/salSettle/audit',
 }
+/**
+ * 审核/反审URL
+ * @param params
+ */
+export const getAuditUrl = Api.audit;
 /**
  * 导出api
  * @param params
@@ -28,6 +35,13 @@ export const getImportUrl = Api.importExcel;
  * @param params
  */
 export const salSettleDetailList = Api.salSettleDetailList;
+
+/**
+ * 查询子表数据
+ * @param params
+ */
+export const salSettleDetailListByIds = Api.salSettleDetailListByIds;
+
 /**
  * 列表接口
  * @param params

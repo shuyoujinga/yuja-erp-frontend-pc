@@ -1,6 +1,6 @@
 <template>
-  <BasicModal v-bind="$attrs" @register="registerModal" destroyOnClose :title="title" :width="896" @ok="handleSubmit">
-      <BasicForm @register="registerForm" ref="formRef"/>
+  <BasicModal v-bind="$attrs" @register="registerModal" destroyOnClose :title="title" :width="2000" @ok="handleSubmit">
+      <BasicForm @register="registerForm" ref="formRef" @valuesChange="handleFormChange" />
   <!-- 子表单区域 -->
     <a-tabs v-model:activeKey="activeKey" animated @change="handleChangeTabs">
       <a-tab-pane tab="销售结算_明细" key="salSettleDetail" :forceRender="true">
@@ -16,6 +16,7 @@
           :rowSelection="true"
           :disabled="formDisabled"
           :toolbar="true"
+          @valueChange="handleValueChange"
           />
       </a-tab-pane>
     </a-tabs>
@@ -29,8 +30,7 @@
     import { JVxeTable } from '/@/components/jeecg/JVxeTable'
     import { useJvxeMethod } from '/@/hooks/system/useJvxeMethods.ts'
     import {formSchema,salSettleDetailColumns} from '../SalSettle.data';
-    import {saveOrUpdate,salSettleDetailList} from '../SalSettle.api';
-    import { VALIDATE_FAILED } from '/@/utils/common/vxeUtils'
+    import {saveOrUpdate,salSettleDetailList,salSettleDetailListByIds} from '../SalSettle.api';
     // Emits声明
     const emit = defineEmits(['register','success']);
     const isUpdate = ref(true);
@@ -45,7 +45,7 @@
           columns:salSettleDetailColumns
     })
     //表单配置
-    const [registerForm, {setProps,resetFields, setFieldsValue, validate}] = useForm({
+    const [registerForm, {setProps,resetFields, setFieldsValue,getFieldsValue, validate}] = useForm({
         //labelWidth: 150,
         schemas: formSchema,
         showActionButtonGroup: false,
@@ -100,6 +100,92 @@
             setModalProps({confirmLoading: false});
         }
     }
+
+    function handleFormChange(changedValues) {
+
+      if (changedValues.deliveryDetailIds !== undefined) {
+        const { deliveryAmountDetail } = changedValues;
+        requestSubTableData(
+          salSettleDetailListByIds,
+          { id: `${changedValues.deliveryDetailIds}` },
+          salSettleDetailTable
+        );
+
+        if (deliveryAmountDetail) {
+          const deliveryAmount = deliveryAmountDetail
+            .split(',')
+            .map(v => Number(v))
+            .filter(v => !Number.isNaN(v))
+            .reduce((sum, v) => sum + v, 0);
+
+          // 保留 2 位精度，且仍然是 Number
+          const finalAmount = Math.round(deliveryAmount * 100) / 100;
+          const { returnAmount = 0 } = getFieldsValue();
+          // 赋值（根据你实际表单 API 调整）
+          setFieldsValue({
+            amount:round(finalAmount-returnAmount),
+            deliveryAmount: finalAmount
+          });
+      }}
+
+      if (changedValues.returnDetailIds !== undefined) {
+        const { returnAmountDetail } = changedValues;
+
+        if (returnAmountDetail) {
+          const returnAmount = returnAmountDetail
+            .split(',')
+            .map(v => Number(v))
+            .filter(v => !Number.isNaN(v))
+            .reduce((sum, v) => sum + v, 0);
+          const { deliveryAmount = 0 } = getFieldsValue();
+          // 保留 2 位精度，且仍然是 Number
+          const finalAmount = Math.round(returnAmount * 100) / 100;
+
+          // 赋值（根据你实际表单 API 调整）
+          setFieldsValue({
+            amount:round(deliveryAmount-finalAmount),
+            returnAmount: finalAmount
+          });
+        }
+      }
+    }
+    function handleValueChange({ row, column }) {
+      if (column.key === 'qty') {
+      console.log(salSettleDetailTable.dataSource)
+        console.log(row)
+        const deliveryAmount = salSettleDetailTable.dataSource
+          .map(item => {
+            // 如果是当前编辑行，用最新 qty 重新算 amount
+            if (item.deliveryDetailId === row.deliveryDetailId) {
+              const qty = Number(row.qty);
+              const price = Number(row.unitPrice);
+              return (!Number.isNaN(qty) && !Number.isNaN(price))
+                ? qty * price
+                : 0;
+            }
+
+            // 其他行用原 amount
+            return Number(item.amount) || 0;
+          })
+          .reduce((sum, v) => sum + v, 0);
+
+        const { returnAmount = 0 } = getFieldsValue();
+
+        const finalAmount = Math.round(
+          (deliveryAmount - Number(returnAmount || 0)) * 100
+        ) / 100;
+
+        setFieldsValue({
+          deliveryAmount:round(deliveryAmount),
+          amount: finalAmount
+        });
+      }
+    }
+    function round(num, scale = 2) {
+      const factor = Math.pow(10, scale)
+      return Math.round((Number(num) || 0) * factor) / factor
+    }
+
 </script>
 
 <style lang="less" scoped>
