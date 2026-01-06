@@ -46,7 +46,7 @@ export const columns: BasicColumn[] = [
   },
 
   {
-    title: '采购申请单',
+    title: '采购申请',
     align: "center",
     dataIndex: 'applyDocCode'
   },
@@ -117,55 +117,6 @@ export const searchFormSchema: FormSchema[] = [
 //表单数据
 export const formSchema: FormSchema[] = [
   {
-    label: '采购申请单',
-    field: 'applyDocCode',
-    component: 'JPopup',
-    componentProps: ({formActionType}) => {
-      const {setFieldsValue} = formActionType;
-      return {
-        setFieldsValue: setFieldsValue,
-        code: "report_pur_apply",
-        fieldConfig: [
-          {source: 'doc_code', target: 'applyDocCode'},
-          {source: 'id', target: 'applyId'},
-        ],
-        multi: false,
-      }
-    },
-
-    dynamicRules: ({model, schema}) => {
-      return [
-        {required: true, message: '请输入采购申请单!'},
-      ];
-    },
-  },
-  {
-    label: '供应商',
-    field: 'supplierCode',
-    component: 'JSearchSelect',
-    componentProps: {
-      dict: "CurrentSupplier"
-    },
-    dynamicRules: ({model, schema}) => {
-      return [
-        {required: true, message: '请输入供应商!'},
-      ];
-    },
-  },
-  {
-    label: '采购类型',
-    field: 'orderType',
-    component: 'JSearchSelect',
-    componentProps: {
-      dict: "dict_pur_order_type"
-    },
-    dynamicRules: ({model, schema}) => {
-      return [
-        {required: true, message: '请输入采购类型!'},
-      ];
-    },
-  },
-  {
     label: '采购订单',
     field: 'docCode',
     component: 'Input',
@@ -186,6 +137,88 @@ export const formSchema: FormSchema[] = [
     },
     defaultValue: new Date()
   },
+  {
+    label: '采购类型',
+    field: 'orderType',
+    component: 'JSearchSelect',
+    componentProps: {
+      dict: "dict_pur_order_type"
+    },
+    dynamicRules: ({model, schema}) => {
+      return [
+        {required: true, message: '请输入采购类型!'},
+      ];
+    },
+  },
+  {
+    label: '采购申请',
+    field: 'applyDocCode',
+    component: 'JPopup',
+    componentProps: ({formActionType}) => {
+      const {setFieldsValue} = formActionType;
+      return {
+        setFieldsValue: setFieldsValue,
+        code: "report_pur_apply",
+        fieldConfig: [
+          {source: 'doc_code', target: 'applyDocCode'},
+          {source: 'id', target: 'applyId'},
+        ],
+        multi: false,
+      }
+    },
+    ifShow:({values}) => {
+      return values.orderType== 2
+    },
+    dynamicRules: ({model, schema}) => {
+      return [
+        {required: true, message: '请输入采购申请!'},
+      ];
+    },
+  },
+
+  {
+    label: '业务计划',
+    field: 'salBizPlanCodes',
+    component: 'JPopup',
+    componentProps: ({formActionType}) => {
+      const {setFieldsValue} = formActionType;
+      return {
+        setFieldsValue: setFieldsValue,
+        code: "report_pur_apply",
+        fieldConfig: [
+          {source: 'doc_code', target: 'salPlanCodes'},
+          {source: 'id', target: 'salBizPlanIds'},
+        ],
+        multi: false,
+      }
+
+    },
+    ifShow:({values}) => {
+      return values.orderType== 0
+    },
+    dynamicRules: ({model, schema}) => {
+      return [
+        {required: true, message: '请输入采购申请!'},
+      ];
+    },
+  },
+
+
+  {
+    label: '供应商',
+    field: 'supplierCode',
+    component: 'JSearchSelect',
+    componentProps: {
+      dict: "CurrentSupplier"
+    },
+    dynamicRules: ({model, schema}) => {
+      return [
+        {required: true, message: '请输入供应商!'},
+      ];
+    },
+  },
+
+
   {
     label: '对方单号',
     field: 'externalOrderNo',
@@ -210,8 +243,14 @@ export const formSchema: FormSchema[] = [
     show: false
   },
   {
-    label: '',
+    label: '采购申请_IDS',
     field: 'applyId',
+    component: 'Input',
+    show: false
+  },
+  {
+    label: '业务计划_IDS',
+    field: 'salBizPlanIds',
     component: 'Input',
     show: false
   },
@@ -310,7 +349,7 @@ export const superQuerySchema = {
   createTime: {title: '创建日期', order: 1, view: 'datetime', type: 'string',},
   sysOrgCode: {title: '所属部门', order: 2, view: 'text', type: 'string',},
   applyId: {
-    title: '采购申请单',
+    title: '采购申请',
     order: 3,
     view: 'popup',
     type: 'string',
