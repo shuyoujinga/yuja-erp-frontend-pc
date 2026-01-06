@@ -1,5 +1,5 @@
 <template>
-  <BasicModal v-bind="$attrs" @register="registerModal" destroyOnClose :title="title" :width="1024" @ok="handleSubmit">
+  <BasicModal v-bind="$attrs" @register="registerModal" destroyOnClose :title="title" :width="2000" @ok="handleSubmit">
       <BasicForm @register="registerForm" ref="formRef"/>
   <!-- 子表单区域 -->
     <a-tabs v-model:activeKey="activeKey" animated @change="handleChangeTabs">
@@ -70,7 +70,7 @@
         //labelWidth: 150,
         schemas: formSchema,
         showActionButtonGroup: false,
-        baseColProps: {span: 8}
+        baseColProps: {span: 12}
     });
      //表单赋值
     const [registerModal, {setModalProps, closeModal}] = useModalInner(async (data) => {
