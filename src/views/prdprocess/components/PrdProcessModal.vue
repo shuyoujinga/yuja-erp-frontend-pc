@@ -1,107 +1,162 @@
 <template>
-  <BasicModal v-bind="$attrs" @register="registerModal" destroyOnClose :width="896" :title="getTitle" @ok="handleSubmit">
-    <BasicForm @register="registerForm"/>
+  <BasicModal v-bind="$attrs" @register="registerModal" destroyOnClose :title="title" :width="2000"
+              @ok="handleSubmit">
+    <BasicForm @register="registerForm" ref="formRef" @valuesChange="handleFormChange"/>
+    <!-- 子表单区域 -->
+    <a-tabs v-model:activeKey="activeKey" animated @change="handleChangeTabs">
+      <a-tab-pane tab="生产工序_明细" key="prdProcessDetail" :forceRender="true">
+        <JVxeTable
+          keep-source
+          resizable
+          ref="prdProcessDetail"
+          :loading="prdProcessDetailTable.loading"
+          :columns="prdProcessDetailTable.columns"
+          :dataSource="prdProcessDetailTable.dataSource"
+          :height="340"
+          :rowNumber="true"
+          :rowSelection="true"
+          :disabled="formDisabled"
+          :toolbar="true"
+          @valueChange="handleValueChange"
+        />
+      </a-tab-pane>
+    </a-tabs>
   </BasicModal>
 </template>
+
 <script lang="ts" setup>
-  import {ref, computed, unref} from 'vue';
-  import {BasicModal, useModalInner} from '/@/components/Modal';
-  import {BasicForm, useForm} from '/@/components/Form';
-  import {formSchema} from '../PrdProcess.data';
-  import {loadTreeData, saveOrUpdateDict} from '../PrdProcess.api';
-  // 获取emit
-  const emit = defineEmits(['register', 'success']);
-  const isUpdate = ref(true);
-  const expandedRowKeys = ref([]);
-  const treeData = ref([]);
-  // 当前编辑的数据
-  let model:Nullable<Recordable> = null;
-  //表单配置
-  const [registerForm, {setProps,resetFields, setFieldsValue, validate, updateSchema}] = useForm({
-    schemas: formSchema,
-    showActionButtonGroup: false,
-    baseColProps: {span: 12},
-    labelCol: {
-      xs: { span: 24 },
-      sm: { span: 4 },
-    },
-    wrapperCol: {
-      xs: { span: 24 },
-      sm: { span: 18 },
-    },
+import {ref, computed, unref, reactive} from 'vue';
+import {BasicModal, useModalInner} from '/@/components/Modal';
+import {BasicForm, useForm} from '/@/components/Form/index';
+import {JVxeTable} from '/@/components/jeecg/JVxeTable'
+import {useJvxeMethod} from '/@/hooks/system/useJvxeMethods.ts'
+import {formSchema, prdProcessDetailColumns} from '../PrdProcess.data';
+import {saveOrUpdate, prdProcessDetailList} from '../PrdProcess.api';
+import {VALIDATE_FAILED} from '/@/utils/common/vxeUtils'
+import {getMaterialByCodeApi} from "@/views/bom/YujiakejiBom.api";
+// Emits声明
+const emit = defineEmits(['register', 'success']);
+const isUpdate = ref(true);
+const formDisabled = ref(false);
+const refKeys = ref(['prdProcessDetail',]);
+const activeKey = ref('prdProcessDetail');
+const prdProcessDetail = ref();
+const tableRefs = {prdProcessDetail,};
+const prdProcessDetailTable = reactive({
+  loading: false,
+  dataSource: [],
+  columns: prdProcessDetailColumns
+})
+//表单配置
+const [registerForm, {setProps, resetFields, setFieldsValue, validate}] = useForm({
+  //labelWidth: 150,
+  schemas: formSchema,
+  showActionButtonGroup: false,
+  baseColProps: {span: 12}
+});
+//表单赋值
+const [registerModal, {setModalProps, closeModal}] = useModalInner(async (data) => {
+  //重置表单
+  await reset();
+  setModalProps({
+    confirmLoading: false,
+    showCancelBtn: data?.showFooter,
+    showOkBtn: data?.showFooter
   });
-  //表单赋值
-  const [registerModal, {setModalProps, closeModal}] = useModalInner(async (data) => {
-    //重置表单
-    await resetFields();
-    expandedRowKeys.value = [];
-    setModalProps({confirmLoading: false, minHeight: 80 ,showOkBtn: !!!data?.hideFooter});
-    isUpdate.value = !!data?.isUpdate;
-    if (data?.record) {
-      model = data.record;
-      //表单赋值
-      await setFieldsValue({
-        ...data.record,
-      });
-    } else {
-      model = null;
-    }
-    //父级节点树信息
-    treeData.value = await loadTreeData({'async': false,'pcode':''});
-    // 隐藏底部时禁用整个表单
-    setProps({ disabled: !!data?.hideFooter })
-  });
-  //设置标题
-  const getTitle = computed(() => (!unref(isUpdate) ? '新增' : '编辑'));
+  isUpdate.value = !!data?.isUpdate;
+  formDisabled.value = !data?.showFooter;
+  if (unref(isUpdate)) {
+    //表单赋值
+    await setFieldsValue({
+      ...data.record,
+    });
+    requestSubTableData(prdProcessDetailList, {id: data?.record?.id}, prdProcessDetailTable)
+  }
+  // 隐藏底部时禁用整个表单
+  setProps({disabled: !data?.showFooter})
+});
+//方法配置
+const [handleChangeTabs, handleSubmit, requestSubTableData, formRef] = useJvxeMethod(requestAddOrEdit, classifyIntoFormData, tableRefs, activeKey, refKeys);
 
-  /**
-   * 根据pid获取展开的节点
-   * @param pid
-   * @param arr
-   */
-  function getExpandKeysByPid(pid,arr){
-    if(pid && arr && arr.length>0){
-      for(let i=0;i<arr.length;i++){
-        if(arr[i].key==pid && unref(expandedRowKeys).indexOf(pid)<0){
-          expandedRowKeys.value.push(arr[i].key);
-          getExpandKeysByPid(arr[i]['parentId'],unref(treeData))
-        }else{
-          getExpandKeysByPid(pid,arr[i].children)
-        }
+//设置标题
+const title = computed(() => (!unref(isUpdate) ? '新增' : '编辑'));
+
+async function reset() {
+  await resetFields();
+  activeKey.value = 'prdProcessDetail';
+  prdProcessDetailTable.dataSource = [];
+}
+
+function classifyIntoFormData(allValues) {
+  let main = Object.assign({}, allValues.formValue)
+  return {
+    ...main, // 展开
+    prdProcessDetailList: allValues.tablesValue[0].tableData,
+  }
+}
+
+//表单提交事件
+async function requestAddOrEdit(values) {
+  try {
+    setModalProps({confirmLoading: true});
+    //提交表单
+    await saveOrUpdate(values, isUpdate.value);
+    //关闭弹窗
+    closeModal();
+    //刷新列表
+    emit('success');
+  } finally {
+    setModalProps({confirmLoading: false});
+  }
+}
+
+// 监听 form valuesChange
+function handleFormChange(changedValues) {
+  if (changedValues.materialCode !== undefined) {
+    getMaterialByCodeApi(changedValues.materialCode).then(res => {
+      if (res) {
+        setFieldsValue({
+          unit: res.unit,
+          specifications: res.specifications,
+        })
+      } else {
+        setFieldsValue({
+          unit: '',
+          specifications: '',
+        })
+
       }
-    }
+    });
   }
-  //表单提交事件
-  async function handleSubmit() {
-    try {
-      let values = await validate();
-      setModalProps({confirmLoading: true});
-      //提交表单
-      await saveOrUpdateDict(values, isUpdate.value);
-      //关闭弹窗
-      closeModal();
-      //展开的节点信息
-      await getExpandKeysByPid(values['pid'],unref(treeData))
-      //刷新列表(isUpdate:是否编辑;values:表单信息;expandedArr:展开的节点信息)
-      emit('success', {
-        isUpdate: unref(isUpdate),
-        values: {...values},
-        expandedArr: unref(expandedRowKeys).reverse(),
-        // 是否更改了父级节点
-        changeParent: model != null && (model['pid'] != values['pid']),
-      });
-    } finally {
-      setModalProps({confirmLoading: false});
-    }
-  }
-</script>
-<style lang="less" scoped>
-	/** 时间和数字输入框样式 */
-    :deep(.ant-input-number){
-		width: 100%
-	}
+}
+function handleValueChange({ row, column, value }) {
+  if (column.key === 'materialCode' && value) {
+    getMaterialByCodeApi(value).then(res => {
+      if (res) {
+        const material = res;
+        row.specifications = material.specifications;
+        row.unit = material.unit;
+        //row.unitPrice = material.unitPrice;
+      } else {
+        row.specifications = '';
+        row.code = '';
+        row.unit = '';
+        row.unit_price = 0;
+      }
+    });
 
-	:deep(.ant-calendar-picker){
-		width: 100%
-	}
+  }
+
+}
+</script>
+
+<style lang="less" scoped>
+/** 时间和数字输入框样式 */
+:deep(.ant-input-number) {
+  width: 100%
+}
+
+:deep(.ant-calendar-picker) {
+  width: 100%
+}
 </style>
