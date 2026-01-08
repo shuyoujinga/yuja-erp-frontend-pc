@@ -1,12 +1,19 @@
 import {BasicColumn} from '/@/components/Table';
 import {FormSchema} from '/@/components/Table';
 import {JVxeTypes, JVxeColumn} from '/@/components/jeecg/JVxeTable/types'
+import {h} from "vue";
 //列表数据
 export const columns: BasicColumn[] = [
   {
     title: '计划单号',
     align: "center",
-    dataIndex: 'docCode'
+    dataIndex: 'docCode',
+    customRender: ({record}) => {
+      return h('a', {
+        style: {color: '#1890ff', cursor: 'pointer'},
+        onClick: () => window?.handleDetail?.(record) && record, // 下面会注册
+      }, record.docCode,);
+    }
   },
   {
     title: '生产日期',

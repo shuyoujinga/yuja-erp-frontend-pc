@@ -15,7 +15,13 @@ enum Api {
   prdMpsBomDetailList = '/prdmps/prdMps/queryPrdMpsBomDetailByMainId',
   prdMpsDetailListByIds = '/prdmps/prdMps/queryPrdMpsDetailByTargetId',
   prdMpsBomDetailListByIds = '/prdmps/prdMps/queryPrdMpsBomDetailByTargetId',
+  audit = '/prdmps/prdMps/audit',
 }
+/**
+ * 审核/反审URL
+ * @param params
+ */
+export const getAuditUrl = Api.audit;
 /**
  * 导出api
  * @param params
