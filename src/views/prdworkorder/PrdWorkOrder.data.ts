@@ -99,7 +99,29 @@ export const columns: BasicColumn[] = [
 
 ];
 //查询数据
-export const searchFormSchema: FormSchema[] = [];
+export const searchFormSchema: FormSchema[] = [
+  {
+    label: '生产工单',
+    field: 'docCode',
+    component: 'Input',
+  },
+  {
+    label: "生产日期",
+    field: "docTime",
+    component: 'RangePicker',
+    componentProps: {
+      valueType: 'Date',
+    },
+  },
+  {
+    label: '产线',
+    field: 'prdLine',
+    component: 'JSearchSelect',
+    componentProps:{
+      dict: "sys_depart,depart_name,org_code,org_category=3"
+    },
+  }
+];
 //表单数据
 export const formSchema: FormSchema[] = [
   {

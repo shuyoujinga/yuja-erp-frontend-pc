@@ -12,7 +12,13 @@ enum Api {
   importExcel = '/prdworkorder/prdWorkOrder/importExcel',
   exportXls = '/prdworkorder/prdWorkOrder/exportXls',
   prdWorkOrderDetailList = '/prdworkorder/prdWorkOrder/queryPrdWorkOrderDetailByMainId',
+  audit = '/prdworkorder/prdWorkOrder/audit',
 }
+/**
+ * 审核/反审URL
+ * @param params
+ */
+export const getAuditUrl = Api.audit;
 /**
  * 导出api
  * @param params
