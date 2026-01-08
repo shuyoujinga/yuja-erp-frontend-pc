@@ -61,7 +61,7 @@ export const formSchema: FormSchema[] = [
     field: 'materialCode',
     component: 'JSearchSelect',
     componentProps: {
-      dict: "CurrentProductionMaterial",
+      dict: "CurrentMaterial",
     },
     dynamicRules: ({model, schema}) => {
       return [

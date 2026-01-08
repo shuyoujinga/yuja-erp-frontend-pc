@@ -1,29 +1,51 @@
 import { defHttp } from '/@/utils/http/axios';
 import { ref, unref } from 'vue';
 import { VALIDATE_FAILED, validateFormModelAndTables } from '/@/utils/common/vxeUtils';
-
+import { Modal } from 'ant-design-vue';
 export function useJvxeMethod(requestAddOrEdit, classifyIntoFormData, tableRefs, activeKey, refKeys, validateSubForm?) {
   const formRef = ref();
-  /** 查询某个tab的数据 */
+
+  /** 查询某个tab的数据（Promise 链 + 抛异常） */
   function requestSubTableData(url, params, tab, success) {
     tab.loading = true;
-    defHttp
+
+    return defHttp
       .get({ url, params }, { isTransformResponse: false })
       .then((res) => {
-        let { result } = res;
-        if (res.success && result) {
-          if (Array.isArray(result)) {
-            tab.dataSource = result;
-          } else if (Array.isArray(result.records)) {
-            tab.dataSource = result.records;
-          }
+        const { success: ok, message, result } = res || {};
+
+        // 1️⃣ 接口明确失败
+        if (!ok) {
+          throw new Error(message || '接口返回失败');
         }
-        typeof success === 'function' ? success(res) : '';
+
+        // 2️⃣ 数据结构异常
+        if (Array.isArray(result)) {
+          tab.dataSource = result;
+        } else if (Array.isArray(result?.records)) {
+          tab.dataSource = result.records;
+        } else {
+          throw new Error('返回数据结构异常');
+        }
+
+        typeof success === 'function' && success(res);
+        return res;
+      })
+      .catch((err) => {
+        // 3️⃣ UI 强提示
+        Modal.error({
+          title: '数据加载失败',
+          content: err?.message || '未知异常',
+        });
+
+        // 4️⃣ 异常继续抛出，别吞
+        throw err;
       })
       .finally(() => {
         tab.loading = false;
       });
   }
+
 
   /* --- handle 事件 --- */
 

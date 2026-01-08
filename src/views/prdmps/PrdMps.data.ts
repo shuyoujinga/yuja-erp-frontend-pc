@@ -9,7 +9,7 @@ export const columns: BasicColumn[] = [
     dataIndex: 'docCode'
   },
   {
-    title: '单据日期',
+    title: '生产日期',
     align: "center",
     dataIndex: 'docTime',
     customRender: ({text}) => {
@@ -69,7 +69,21 @@ export const columns: BasicColumn[] = [
 
 ];
 //查询数据
-export const searchFormSchema: FormSchema[] = [];
+export const searchFormSchema: FormSchema[] = [
+  {
+    label: '计划单号',
+    field: 'docCode',
+    component: 'Input',
+  },
+  {
+    label: "生产日期",
+    field: "docTime",
+    component: 'RangePicker',
+    componentProps: {
+      valueType: 'Date',
+    },
+  }
+];
 //表单数据
 export const formSchema: FormSchema[] = [
   {
@@ -79,7 +93,7 @@ export const formSchema: FormSchema[] = [
     dynamicDisabled: true
   },
   {
-    label: '制单日期',
+    label: '生产日期',
     field: 'docTime',
     component: 'DatePicker',
     componentProps: {
@@ -93,10 +107,30 @@ export const formSchema: FormSchema[] = [
     },
     defaultValue: new Date()
   },
+
   {
     label: '业务计划',
     field: 'bizPlanCodes',
-    component: 'Input',
+    component: 'JPopup',
+    componentProps: ({formActionType,formModel}) => {
+      const {setFieldsValue} = formActionType;
+      return {
+        setFieldsValue: setFieldsValue,
+        code: "report_sal_biz_plan",
+        fieldConfig: [
+          {source: 'doc_code', target: 'bizPlanCodes'},
+          {source: 'id', target: 'bizPlanIds'},
+          {source: 'detail_id', target: 'bizPlanDetailIds'},
+          {source: 'required_delivery_time', target: 'deliveryTime'},
+        ],
+        multi: true,
+      }
+    },
+    dynamicRules: ({model, schema}) => {
+      return [
+        {required: true, message: '请选择业务计划!'},
+      ];
+    },
   },
   {
     label: '要求交期',
@@ -111,7 +145,7 @@ export const formSchema: FormSchema[] = [
         {required: true, message: '请输入制单日期!'},
       ];
     },
-    defaultValue: new Date()
+    dynamicDisabled: true
   },
   {
     label: '回复交期',
@@ -143,30 +177,53 @@ export const formSchema: FormSchema[] = [
     show: false
   },
   {
+    label: '业务计划明细_IDS',
+    field: 'bizPlanDetailIds',
+    component: 'Input',
+    show: false
+  },
+  {
     label: '业务计划_IDS',
     field: 'bizPlanIds',
     component: 'Input',
+    show: false
   },
 ];
 //子表单数据
 //子表表格配置
 export const prdMpsDetailColumns: JVxeColumn[] = [
-
+  {
+    title: '产线',
+    key: 'prdLine',
+    type: JVxeTypes.selectSearch,
+    dictCode: 'sys_depart,depart_name,org_code,org_category=3',
+    options: [],
+    width: "150px",
+    placeholder: '请输入${title}',
+    defaultValue: '',
+    validateRules: [{required: true, message: '${title}不能为空'}],
+  },
   {
     title: '物料',
     key: 'materialCode',
-    type: JVxeTypes.input,
-    width: "200px",
+    type: JVxeTypes.selectSearch,
+    dictCode:'CurrentMaterial',
+    width: "350px",
     placeholder: '请输入${title}',
     defaultValue: '',
+    disabled:true,
+    validateRules: [{required: true, message: '${title}不能为空'}],
   },
   {
     title: '单位',
     key: 'unit',
-    type: JVxeTypes.input,
-    width: "200px",
+    type: JVxeTypes.selectSearch,
+    options: [],
+    dictCode: "dict_materials_unit",
+    width: "100px",
     placeholder: '请输入${title}',
     defaultValue: '',
+    disabled: true
   },
   {
     title: '规格',
@@ -175,6 +232,7 @@ export const prdMpsDetailColumns: JVxeColumn[] = [
     width: "200px",
     placeholder: '请输入${title}',
     defaultValue: '',
+    disabled: true
   },
   {
     title: '业务数量',
@@ -183,6 +241,7 @@ export const prdMpsDetailColumns: JVxeColumn[] = [
     width: "200px",
     placeholder: '请输入${title}',
     defaultValue: '',
+    disabled: true
   },
   {
     title: '排产数量',
@@ -191,14 +250,51 @@ export const prdMpsDetailColumns: JVxeColumn[] = [
     width: "200px",
     placeholder: '请输入${title}',
     defaultValue: '',
+    validateRules: [{required: true, message: '${title}不能为空'},{
+      handler({ cellValue, row }, callback) {
+        const bizQty = Number(row.bizQty || 0)
+        const shipQty = Number(cellValue || 0)
+
+        if (shipQty > bizQty) {
+          row.amount = 0
+          callback(false, '排产数不能超过计划数，不允许填写!')
+          return
+        }
+
+
+        callback(true)
+      }}],
+  },
+  {
+    title: '工序类型',
+    key: 'processType',
+    type: JVxeTypes.selectSearch,
+    dictCode: 'dict_process_type',
+    options: [],
+    width: "150px",
+    placeholder: '请输入${title}',
+    defaultValue: '',
+    disabled: true
   },
   {
     title: '工序',
-    key: 'sequenceCode',
-    type: JVxeTypes.inputNumber,
-    width: "200px",
+    key: 'processCode',
+    type: JVxeTypes.selectSearch,
+    dictCode: 'dict_process_code',
+    options: [],
+    width: "150px",
     placeholder: '请输入${title}',
     defaultValue: '',
+    disabled: true
+  },
+  {
+    title: 'BOM编码',
+    key: 'bomCode',
+    type: JVxeTypes.input,
+    width: "150px",
+    placeholder: '请输入${title}',
+    defaultValue: '',
+    disabled: true
   },
   {
     title: '备注',
@@ -210,21 +306,39 @@ export const prdMpsDetailColumns: JVxeColumn[] = [
   },
 ]
 export const prdMpsBomDetailColumns: JVxeColumn[] = [
+
+  {
+    title: '上级物料',
+    key: 'productionMaterialCode',
+    type: JVxeTypes.selectSearch,
+    dictCode:'CurrentMaterial',
+    width: "350px",
+    placeholder: '请输入${title}',
+    defaultValue: '',
+    disabled:true,
+    validateRules: [{required: true, message: '${title}不能为空'}],
+  },
   {
     title: '物料',
     key: 'materialCode',
-    type: JVxeTypes.input,
-    width: "200px",
+    type: JVxeTypes.selectSearch,
+    dictCode:'CurrentMaterial',
+    width: "350px",
     placeholder: '请输入${title}',
     defaultValue: '',
+    disabled:true,
+    validateRules: [{required: true, message: '${title}不能为空'}],
   },
   {
     title: '单位',
     key: 'unit',
-    type: JVxeTypes.input,
-    width: "200px",
+    type: JVxeTypes.selectSearch,
+    options: [],
+    dictCode: "dict_materials_unit",
+    width: "100px",
     placeholder: '请输入${title}',
     defaultValue: '',
+    disabled: true
   },
   {
     title: '规格',
@@ -233,30 +347,53 @@ export const prdMpsBomDetailColumns: JVxeColumn[] = [
     width: "200px",
     placeholder: '请输入${title}',
     defaultValue: '',
+    disabled: true
   },
   {
     title: '单价',
     key: 'unitPrice',
     type: JVxeTypes.inputNumber,
-    width: "200px",
+    width: "100px",
     placeholder: '请输入${title}',
     defaultValue: '',
+    disabled: true
+  },
+
+  {
+    title: '标量',
+    key: 'standardQty',
+    type: JVxeTypes.inputNumber,
+    width: "100px",
+    placeholder: '请输入${title}',
+    defaultValue: '',
+    disabled: true
   },
   {
     title: '要求数量',
     key: 'qty',
     type: JVxeTypes.inputNumber,
-    width: "200px",
+    width: "100px",
     placeholder: '请输入${title}',
     defaultValue: '',
+    disabled: true
   },
   {
     title: '可用库存',
     key: 'stockQty',
     type: JVxeTypes.inputNumber,
-    width: "200px",
+    width: "100px",
     placeholder: '请输入${title}',
     defaultValue: '',
+    disabled: true
+  },
+  {
+    title: 'BOM编码',
+    key: 'bomCode',
+    type: JVxeTypes.input,
+    width: "150px",
+    placeholder: '请输入${title}',
+    defaultValue: '',
+    disabled: true
   },
   {
     title: '其他说明',
@@ -266,6 +403,7 @@ export const prdMpsBomDetailColumns: JVxeColumn[] = [
     placeholder: '请输入${title}',
     defaultValue: '',
   },
+
 ]
 
 

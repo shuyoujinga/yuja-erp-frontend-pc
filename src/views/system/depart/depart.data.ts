@@ -85,6 +85,7 @@ export const orgCategoryOptions = {
   // 子级部门
   child: [
     { value: '2', label: '部门' },
-    { value: '3', label: '岗位' },
+    { value: '3', label: '产线' },
+    { value: '4', label: '仓库' },
   ],
 };

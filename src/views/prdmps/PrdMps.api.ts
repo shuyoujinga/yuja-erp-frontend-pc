@@ -13,6 +13,8 @@ enum Api {
   exportXls = '/prdmps/prdMps/exportXls',
   prdMpsDetailList = '/prdmps/prdMps/queryPrdMpsDetailByMainId',
   prdMpsBomDetailList = '/prdmps/prdMps/queryPrdMpsBomDetailByMainId',
+  prdMpsDetailListByIds = '/prdmps/prdMps/queryPrdMpsDetailByTargetId',
+  prdMpsBomDetailListByIds = '/prdmps/prdMps/queryPrdMpsBomDetailByTargetId',
 }
 /**
  * 导出api
@@ -34,6 +36,17 @@ export const prdMpsDetailList = Api.prdMpsDetailList;
  * @param params
  */
 export const prdMpsBomDetailList = Api.prdMpsBomDetailList;
+
+/**
+ * 查询子表数据
+ * @param params
+ */
+export const prdMpsDetailListByIds = Api.prdMpsDetailListByIds;
+/**
+ * 查询子表数据
+ * @param params
+ */
+export const prdMpsBomDetailListByIds = Api.prdMpsBomDetailListByIds;
 /**
  * 列表接口
  * @param params

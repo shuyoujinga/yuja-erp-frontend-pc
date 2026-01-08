@@ -1,6 +1,6 @@
 <template>
   <BasicModal v-bind="$attrs" @register="registerModal" destroyOnClose :title="title" :width="2000" @ok="handleSubmit">
-      <BasicForm @register="registerForm" ref="formRef"/>
+      <BasicForm @register="registerForm" ref="formRef" @valuesChange="handleFormChange"/>
   <!-- 子表单区域 -->
     <a-tabs v-model:activeKey="activeKey" animated @change="handleChangeTabs">
       <a-tab-pane tab="生产计划_明细" key="prdMpsDetail" :forceRender="true">
@@ -15,7 +15,7 @@
           :rowNumber="true"
           :rowSelection="true"
           :disabled="formDisabled"
-          :toolbar="true"
+          @valueChange="handleValueChange"
           />
       </a-tab-pane>
       <a-tab-pane tab="生产计划_材料清单" key="prdMpsBomDetail" :forceRender="true">
@@ -30,7 +30,6 @@
           :rowNumber="true"
           :rowSelection="true"
           :disabled="formDisabled"
-          :toolbar="true"
           />
       </a-tab-pane>
     </a-tabs>
@@ -44,8 +43,13 @@
     import { JVxeTable } from '/@/components/jeecg/JVxeTable'
     import { useJvxeMethod } from '/@/hooks/system/useJvxeMethods.ts'
     import {formSchema,prdMpsDetailColumns,prdMpsBomDetailColumns} from '../PrdMps.data';
-    import {saveOrUpdate,prdMpsDetailList,prdMpsBomDetailList} from '../PrdMps.api';
-    import { VALIDATE_FAILED } from '/@/utils/common/vxeUtils'
+    import {
+      saveOrUpdate,
+      prdMpsDetailList,
+      prdMpsBomDetailList,
+      prdMpsBomDetailListByIds, prdMpsDetailListByIds
+    } from '../PrdMps.api';
+
     // Emits声明
     const emit = defineEmits(['register','success']);
     const isUpdate = ref(true);
@@ -123,6 +127,44 @@
         } finally {
             setModalProps({confirmLoading: false});
         }
+    }
+    function handleFormChange(changedValues) {
+      // 编辑态初始化阶段，直接忽略 isTax 的联动
+      if (changedValues.bizPlanDetailIds !== undefined) {
+        // 直接加载明细
+        requestSubTableData(prdMpsDetailListByIds, {id: `${changedValues.bizPlanDetailIds}`}, prdMpsDetailTable);
+        // 加载BOM明细
+        requestSubTableData(prdMpsBomDetailListByIds, {id: `${changedValues.bizPlanDetailIds}`}, prdMpsBomDetailTable);
+
+      }
+
+
+    }
+    function handleValueChange({row, column, value}) {
+      // 只在计划数量变化时处理
+      if (column.key === 'qty') {
+
+        const materialCode = row.materialCode
+        const qty = Number(value) || 0
+
+        const dataSource = prdMpsBomDetailTable.dataSource || []
+        if (!materialCode || dataSource.length === 0) return
+
+        dataSource.forEach(item => {
+          if (item.productionMaterialCode === materialCode) {
+            const standardQty = Number(item.standardQty) || 0
+            item.qty = round(qty * standardQty)
+            // 同步 bomCode 到当前行
+            row.bomCode = item.bomCode
+            console.log(item)
+          }
+        })
+        prdMpsBomDetailTable.dataSource=[...dataSource]
+      }
+    }
+    function round(num, scale = 2) {
+      const factor = Math.pow(10, scale)
+      return Math.round((Number(num) || 0) * factor) / factor
     }
 </script>
 
