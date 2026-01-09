@@ -12,7 +12,14 @@ enum Api {
   importExcel = '/prdissue/prdIssue/importExcel',
   exportXls = '/prdissue/prdIssue/exportXls',
   prdIssueDetailList = '/prdissue/prdIssue/queryPrdIssueDetailByMainId',
+  prdIssueDetailListByIds = '/prdissue/prdIssue/queryPrdIssueDetailByTargetId',
+  audit = '/prdissue/prdIssue/audit',
 }
+/**
+ * 审核/反审URL
+ * @param params
+ */
+export const getAuditUrl = Api.audit;
 /**
  * 导出api
  * @param params
@@ -28,6 +35,11 @@ export const getImportUrl = Api.importExcel;
  * @param params
  */
 export const prdIssueDetailList = Api.prdIssueDetailList;
+/**
+ * 查询子表数据
+ * @param params
+ */
+export const prdIssueDetailListByIds = Api.prdIssueDetailListByIds;
 /**
  * 列表接口
  * @param params
