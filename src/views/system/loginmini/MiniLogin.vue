@@ -4,7 +4,7 @@
     <AppDarkModeToggle class="absolute top-3 right-7 enter-x" />
     <div class="aui-logo" v-if="!getIsMobile">
       <div class="aui-phone-logo">
-        <h2>
+        <h2 style="color: rgb(253, 117, 47);">
           <img :src="logoImg" alt="jeecg" />
           渔佳科技-ERP管理系统
         </h2>
@@ -19,9 +19,8 @@
           <div class="aui-form">
             <div class="aui-image">
               <div class="aui-image-text">
-                <h2 align="left">渔佳科技（中山）股份有限公司</h2>
-                <br/>
-                <h3 align="right">——致力于成为全球领先的高端制造厂商</h3>
+
+
               </div>
             </div>
             <div class="aui-formBox">

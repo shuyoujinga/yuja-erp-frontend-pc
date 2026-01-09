@@ -16,6 +16,7 @@
           :rowSelection="true"
           :disabled="formDisabled"
           :toolbar="true"
+          @valueChange="handleValueChange"
           />
       </a-tab-pane>
     </a-tabs>
@@ -31,6 +32,7 @@
     import {formSchema,prdReportDetailColumns} from '../PrdReport.data';
     import {saveOrUpdate, prdReportDetailList, prdReportDetailListByIds} from '../PrdReport.api';
     import {useMessage} from "@/hooks/web/useMessage";
+    import {getStockMaterial} from "@/api/common/api";
     // Emits声明
     const emit = defineEmits(['register','success']);
     const isUpdate = ref(true);
@@ -46,7 +48,7 @@
     })
     const { createMessage } = useMessage()
     //表单配置
-    const [registerForm, {setProps,resetFields, setFieldsValue, validate}] = useForm({
+    const [registerForm, {setProps,resetFields, setFieldsValue,getFieldsValue, validate}] = useForm({
         //labelWidth: 150,
         schemas: formSchema,
         showActionButtonGroup: false,
@@ -102,60 +104,64 @@
         }
     }
 
-    function handleFormChange(changedValues, allValues) {
+    function handleFormChange(changedValues) {
       // 只监听 workOrderDetailIds
-      if (changedValues.workOrderDetailIds === undefined) return;
-      console.log('数量是',changedValues.qtyStr)
-      const {
-        materialCode: materialCodeStr = '',
-        qtyStr: qtyStr = '',
-      } = allValues || {};
-      console.log('数量是',changedValues.qtyStr)
-      // ===== materialCode 处理 =====
-      const materialCodeArr = String(materialCodeStr)
-        .split(',')
-        .map(s => s.trim())
-        .filter(Boolean);
+      if (changedValues.workOrderIds !== undefined) {
+        requestSubTableData(
+          prdReportDetailListByIds,
+          { id: changedValues.workOrderIds },
+          prdReportDetailTable
+        )
+      }
+      if (changedValues.qty !== undefined) {
+        const qty = Number(changedValues.qty) || 0;
+        const orderQty = Number(getFieldsValue().orderQty) || 0;
 
-      const uniqueMaterialCodes = [...new Set(materialCodeArr)];
+        // ① 先做业务红线校验
+        if (qty > orderQty) {
+          createMessage.error('完工数不可超过工单数量,请重新填写!');
 
-      // ❌ materialCode 不完全一致
-      if (uniqueMaterialCodes.length !== 1) {
-        createMessage.error('操作失败，生产产品必须完全一致');
+          // 强制回滚输入框
+          setFieldsValue({ qty: null });
 
-        formRef.value?.setFieldsValue({
-          workOrderDetailIds: [],
-          materialCode: undefined,
-          qty: undefined,
+          // 金额也要清零，避免脏数据残留
+          prdReportDetailTable.dataSource = prdReportDetailTable.dataSource.map(row => ({
+            ...row,
+            amount: 0
+          }));
+          return;
+        }
+
+        // ② 合法才参与计算
+
+        prdReportDetailTable.dataSource = prdReportDetailTable.dataSource.map(row => {
+          const score = Number(row.score) || 0;
+          const avgUnitPrice = Number(row.avgUnitPrice) || 0;
+          const amount = Math.round(qty * score * avgUnitPrice * 100) / 100;
+
+          return {
+            ...row,
+            amount
+          };
         });
-
-        return;
       }
 
-      const materialCode = uniqueMaterialCodes[0];
 
-      // ===== qty 处理 =====
-      const qtyArr = String(qtyStr)
-        .split(',')
-        .map(s => s.trim())
-        .filter(Boolean);
 
-      // 规则：不校验一致性，直接取第一个
-      const qty = Number(qtyArr[0]) || 0;
-
-      // ===== 回填 =====
-      formRef.value?.setFieldsValue({
-        materialCode,
-        qty,
-      });
-
-      // ===== 请求子表 =====
-      requestSubTableData(
-        prdReportDetailListByIds,
-        { id: changedValues.workOrderDetailIds },
-        prdReportDetailTable
-      );
     }
+
+    function handleValueChange({ row, column, value }) {
+      // 主表取值（一次取全量，不要频繁调用）
+      const { qty } = getFieldsValue() || {};
+
+      // 只在“物料变化 + 仓库已选”的情况下查库存物料
+      if (column.key === 'score' && value && qty) {
+        row.amount=Math.round(value*qty* row.avgUnitPrice * 100) / 100
+      }
+
+
+    }
+
 
 </script>
 

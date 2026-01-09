@@ -68,7 +68,7 @@
   //注册model
   const [registerModal, {openModal}] = useModal();
    //注册table数据
-  const { prefixCls,tableContext,onExportXls,onImportXls } = useListPage({
+  const { prefixCls,tableContext,onExportXls,onImportXls ,onAudit} = useListPage({
       tableProps:{
            title: '生产报工',
            api: list,

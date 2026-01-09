@@ -289,30 +289,14 @@ export const formSchema: FormSchema[] = [
     label: '邮箱',
     field: 'email',
     component: 'Input',
-    dynamicRules: ({ model, schema }) => {
-      return [
-        { ...rules.duplicateCheckRule('sys_user', 'email', model, schema, true)[0], trigger: 'blur' },
-        { ...rules.rule('email', false)[0], trigger: 'blur' },
-      ];
-    },
   },
   {
     label: '手机号码',
     field: 'phone',
     component: 'Input',
-    dynamicRules: ({ model, schema }) => {
-      return [
-        { ...rules.duplicateCheckRule('sys_user', 'phone', model, schema, true)[0], trigger: 'blur' },
-        { pattern: /^1[3456789]\d{9}$/, message: '手机号码格式有误', trigger: 'blur' },
-      ];
-    },
+
   },
-  {
-    label: '座机',
-    field: 'telephone',
-    component: 'Input',
-    rules: [{ pattern: /^0\d{2,3}-[1-9]\d{6,7}$/, message: '请输入正确的座机号码' }],
-  },
+
   {
     label: '工作流引擎',
     field: 'activitiSync',
