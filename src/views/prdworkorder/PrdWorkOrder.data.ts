@@ -49,6 +49,16 @@ export const columns: BasicColumn[] = [
     dataIndex: 'processCode_dictText'
   },
   {
+    title: '用工类型',
+    align: "center",
+    dataIndex: 'workType_dictText'
+  },
+  {
+    title: '工序单价',
+    align: "center",
+    dataIndex: 'workUnitPrice'
+  },
+  {
     title: '生产产品',
     align: "center",
     dataIndex: 'materialCode_dictText'
@@ -120,7 +130,15 @@ export const searchFormSchema: FormSchema[] = [
     componentProps:{
       dict: "sys_depart,depart_name,org_code,org_category=3"
     },
-  }
+  },
+  {
+    label: '用工类型',
+    field: 'workType',
+    component: 'JSearchSelect',
+    componentProps:{
+      dict: "dict_work_type"
+    },
+  },
 ];
 //表单数据
 export const formSchema: FormSchema[] = [
@@ -169,6 +187,21 @@ export const formSchema: FormSchema[] = [
     component: 'JSearchSelect',
     componentProps:{
       dict: "dict_process_code"
+    },
+
+  },
+  {
+    label: '工序单价',
+    field: 'workUnitPrice',
+    component: 'InputNumber',
+    dynamicDisabled: true
+  },
+  {
+    label: '用工类型',
+    field: 'workType',
+    component: 'JSearchSelect',
+    componentProps:{
+      dict: "dict_work_type"
     },
     dynamicDisabled: true
   },

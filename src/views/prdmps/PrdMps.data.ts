@@ -245,7 +245,7 @@ export const prdMpsDetailColumns: JVxeColumn[] = [
     title: '业务数量',
     key: 'bizQty',
     type: JVxeTypes.inputNumber,
-    width: "200px",
+    width: "100px",
     placeholder: '请输入${title}',
     defaultValue: '',
     disabled: true
@@ -254,7 +254,7 @@ export const prdMpsDetailColumns: JVxeColumn[] = [
     title: '排产数量',
     key: 'qty',
     type: JVxeTypes.inputNumber,
-    width: "200px",
+    width: "100px",
     placeholder: '请输入${title}',
     defaultValue: '',
     validateRules: [{required: true, message: '${title}不能为空'},{
@@ -272,6 +272,7 @@ export const prdMpsDetailColumns: JVxeColumn[] = [
         callback(true)
       }}],
   },
+
   {
     title: '工序类型',
     key: 'processType',
@@ -292,6 +293,25 @@ export const prdMpsDetailColumns: JVxeColumn[] = [
     width: "150px",
     placeholder: '请输入${title}',
     defaultValue: '',
+    disabled: true
+  },
+  {
+    title: '用工类型',
+    key: 'workType',
+    type: JVxeTypes.selectSearch,
+    dictCode: 'dict_work_type',
+    width:"100px",
+    placeholder: '请输入${title}',
+    defaultValue:'',
+    disabled: true
+  },
+  {
+    title: '工序单价',
+    key: 'workUnitPrice',
+    type: JVxeTypes.inputNumber,
+    width:"100px",
+    placeholder: '请输入${title}',
+    defaultValue:'',
     disabled: true
   },
   {
