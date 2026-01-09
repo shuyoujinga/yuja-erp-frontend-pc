@@ -62,10 +62,10 @@
     padding-left: 7px;
     cursor: pointer;
     transition: all 0.2s ease;
-    //左侧菜单模式和左侧菜单混合模式加渐变背景色
-    &.jeecg-layout-mix-sider-logo,&.jeecg-layout-menu-logo{
-      background:@sider-logo-bg-color;
-    }
+    //左侧菜单模式和左侧菜单混合模式加渐变背景色 颜色统一 2026年1月9日20:37:57 舒有敬
+    //&.jeecg-layout-mix-sider-logo,&.jeecg-layout-menu-logo{
+    //  background:@sider-logo-bg-color;
+    //}
     // &.light {
     //   border-bottom: 1px solid @border-color-base;
     // }
