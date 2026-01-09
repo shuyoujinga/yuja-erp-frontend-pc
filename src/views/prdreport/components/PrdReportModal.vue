@@ -137,7 +137,7 @@
         prdReportDetailTable.dataSource = prdReportDetailTable.dataSource.map(row => {
           const score = Number(row.score) || 0;
           const avgUnitPrice = Number(row.avgUnitPrice) || 0;
-          const amount = Math.round(qty * score * avgUnitPrice * 100) / 100;
+          const amount = Math.round(qty * (score/10) * avgUnitPrice * 100) / 100;
 
           return {
             ...row,
@@ -156,7 +156,8 @@
 
       // 只在“物料变化 + 仓库已选”的情况下查库存物料
       if (column.key === 'score' && value && qty) {
-        row.amount=Math.round(value*qty* row.avgUnitPrice * 100) / 100
+
+        row.amount=Math.round((value/10)*qty* row.avgUnitPrice * 100) / 100
       }
 
 
