@@ -1,6 +1,6 @@
 <template>
-  <BasicModal v-bind="$attrs" @register="registerModal" destroyOnClose :title="title" :width="896" @ok="handleSubmit">
-      <BasicForm @register="registerForm" ref="formRef"/>
+  <BasicModal v-bind="$attrs" @register="registerModal" destroyOnClose :title="title" :width="1200" @ok="handleSubmit">
+      <BasicForm @register="registerForm" ref="formRef"  @valuesChange="handleFormChange" />
   <!-- 子表单区域 -->
     <a-tabs v-model:activeKey="activeKey" animated @change="handleChangeTabs">
       <a-tab-pane tab="生产报工_明细" key="prdReportDetail" :forceRender="true">
@@ -29,8 +29,8 @@
     import { JVxeTable } from '/@/components/jeecg/JVxeTable'
     import { useJvxeMethod } from '/@/hooks/system/useJvxeMethods.ts'
     import {formSchema,prdReportDetailColumns} from '../PrdReport.data';
-    import {saveOrUpdate,prdReportDetailList} from '../PrdReport.api';
-    import { VALIDATE_FAILED } from '/@/utils/common/vxeUtils'
+    import {saveOrUpdate, prdReportDetailList, prdReportDetailListByIds} from '../PrdReport.api';
+    import {useMessage} from "@/hooks/web/useMessage";
     // Emits声明
     const emit = defineEmits(['register','success']);
     const isUpdate = ref(true);
@@ -44,6 +44,7 @@
           dataSource: [],
           columns:prdReportDetailColumns
     })
+    const { createMessage } = useMessage()
     //表单配置
     const [registerForm, {setProps,resetFields, setFieldsValue, validate}] = useForm({
         //labelWidth: 150,
@@ -100,6 +101,62 @@
             setModalProps({confirmLoading: false});
         }
     }
+
+    function handleFormChange(changedValues, allValues) {
+      // 只监听 workOrderDetailIds
+      if (changedValues.workOrderDetailIds === undefined) return;
+      console.log('数量是',changedValues.qtyStr)
+      const {
+        materialCode: materialCodeStr = '',
+        qtyStr: qtyStr = '',
+      } = allValues || {};
+      console.log('数量是',changedValues.qtyStr)
+      // ===== materialCode 处理 =====
+      const materialCodeArr = String(materialCodeStr)
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean);
+
+      const uniqueMaterialCodes = [...new Set(materialCodeArr)];
+
+      // ❌ materialCode 不完全一致
+      if (uniqueMaterialCodes.length !== 1) {
+        createMessage.error('操作失败，生产产品必须完全一致');
+
+        formRef.value?.setFieldsValue({
+          workOrderDetailIds: [],
+          materialCode: undefined,
+          qty: undefined,
+        });
+
+        return;
+      }
+
+      const materialCode = uniqueMaterialCodes[0];
+
+      // ===== qty 处理 =====
+      const qtyArr = String(qtyStr)
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean);
+
+      // 规则：不校验一致性，直接取第一个
+      const qty = Number(qtyArr[0]) || 0;
+
+      // ===== 回填 =====
+      formRef.value?.setFieldsValue({
+        materialCode,
+        qty,
+      });
+
+      // ===== 请求子表 =====
+      requestSubTableData(
+        prdReportDetailListByIds,
+        { id: changedValues.workOrderDetailIds },
+        prdReportDetailTable
+      );
+    }
+
 </script>
 
 <style lang="less" scoped>

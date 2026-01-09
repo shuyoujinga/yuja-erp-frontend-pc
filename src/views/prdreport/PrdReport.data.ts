@@ -1,14 +1,19 @@
 import {BasicColumn} from '/@/components/Table';
 import {FormSchema} from '/@/components/Table';
-import { rules} from '/@/utils/helper/validator';
-import { render } from '/@/utils/common/renderUtils';
 import {JVxeTypes,JVxeColumn} from '/@/components/jeecg/JVxeTable/types'
+import {h} from "vue";
 //列表数据
 export const columns: BasicColumn[] = [
    {
     title: '报工单号',
     align:"center",
-    dataIndex: 'docCode'
+    dataIndex: 'docCode',
+     customRender: ({record}) => {
+       return h('a', {
+         style: {color: '#1890ff', cursor: 'pointer'},
+         onClick: () => window?.handleDetail?.(record) && record, // 下面会注册
+       }, record.docCode,);
+     }
    },
    {
     title: '制单日期',
@@ -19,25 +24,20 @@ export const columns: BasicColumn[] = [
     },
    },
    {
-    title: '生产工单_IDS',
-    align:"center",
-    dataIndex: 'workOrderIds'
-   },
-   {
-    title: '生产工单',
-    align:"center",
-    dataIndex: 'workOrderCodes'
-   },
-   {
     title: '生产产品',
     align:"center",
-    dataIndex: 'materialCode'
+    dataIndex: 'materialCode_dictText'
    },
    {
     title: '产线',
     align:"center",
-    dataIndex: 'prdLine'
+    dataIndex: 'prdLine_dictText'
    },
+  {
+    title: '生产工单',
+    align:"center",
+    dataIndex: 'workOrderCodes'
+  },
    {
     title: '工单数量',
     align:"center",
@@ -51,7 +51,7 @@ export const columns: BasicColumn[] = [
    {
     title: '状态',
     align:"center",
-    dataIndex: 'status'
+    dataIndex: 'status_dictText'
    },
    {
     title: '审核状态',
@@ -79,13 +79,34 @@ export const columns: BasicColumn[] = [
 ];
 //查询数据
 export const searchFormSchema: FormSchema[] = [
+  {
+    label: '报工单号',
+    field: 'docCode',
+    component: 'Input',
+  },
+  {
+    label: "制单日期",
+    field: "docTime",
+    component: 'RangePicker',
+    componentProps: {
+      valueType: 'Date',
+    },
+  },
+  {
+    label: '产线',
+    field: 'prdLine',
+    component: 'JSearchSelect',
+    componentProps: {
+      dict: "sys_depart,depart_name,org_code,org_category=3"
+    },}
 ];
 //表单数据
 export const formSchema: FormSchema[] = [
   {
     label: '报工单号',
-         field: 'docCode',
-    component: 'Input',dynamicDisabled:true 
+    field: 'docCode',
+    component: 'Input',
+    dynamicDisabled:true
   },
   {
     label: '制单日期',
@@ -102,54 +123,65 @@ export const formSchema: FormSchema[] = [
     },
     defaultValue: new Date()},
   {
-    label: '生产工单_IDS',
-    field: 'workOrderIds',
-    component: 'Input',
+    label: '产线',
+    field: 'prdLine',
+    component: 'JSearchSelect',
+    componentProps: {
+      dict: "sys_depart,depart_name,org_code,org_category=3"
+    },
+    dynamicRules: ({model, schema}) => {
+      return [
+        {required: true, message: '请输入领料类型!'},
+      ];
+    },
   },
+
   {
     label: '生产工单',
     field: 'workOrderCodes',
-    component: 'Input',
+    component: 'JPopup',
+    componentProps: ({formActionType, formModel}) => {
+      const {setFieldsValue} = formActionType;
+      return {
+        setFieldsValue: setFieldsValue,
+        code: "report_prd_work",
+        fieldConfig: [
+          {source: 'doc_code', target: 'workOrderCodes'},
+          {source: 'id', target: 'workOrderIds'},
+          {source: 'detail_id', target: 'workOrderDetailIds'},
+          {source: 'production_material_code', target: 'materialCode'},
+          {source: 'work_qty', target: 'qtyStr'},
+        ],
+        multi: true,
+        param: {prd_line: `'${formModel.prdLine}'`}
+      }
+    },
+    dynamicRules: ({model, schema}) => {
+      return [
+        {required: true, message: '请选择销售订单!'},
+      ];
+    },
   },
   {
     label: '生产产品',
     field: 'materialCode',
-    component: 'Input',
+    component: 'JSearchSelect',
+    componentProps: {
+      dict: "CurrentMaterial"
+    },
+    dynamicDisabled: true
   },
-  {
-    label: '产线',
-    field: 'prdLine',
-    component: 'Input',
-  },
+
   {
     label: '工单数量',
     field: 'orderQty',
     component: 'InputNumber',
+    dynamicDisabled: true
   },
   {
     label: '完成数',
     field: 'qty',
     component: 'InputNumber',
-  },
-  {
-    label: '状态',
-    field: 'status',
-    component: 'InputNumber',
-  },
-  {
-    label: '审核状态',
-    field: 'audit',
-    component: 'InputNumber',
-  },
-  {
-    label: '审核人',
-    field: 'auditBy',
-    component: 'Input',
-  },
-  {
-    label: '审核时间',
-    field: 'auditTime',
-    component: 'DatePicker',
   },
   {
     label: '备注',
@@ -163,18 +195,28 @@ export const formSchema: FormSchema[] = [
 	  component: 'Input',
 	  show: false
 	},
+  {
+    label: '工单数量_Str',
+    field: 'qtyStr',
+    component: 'Input',
+    show: false
+  },
+  {
+    label: '工单IDS',
+    field: 'workOrderIds',
+    component: 'Input',
+    show: false
+  },
+  {
+    label: '工单明细IDS',
+    field: 'workOrderDetailIds',
+    component: 'Input',
+    show: false
+  },
 ];
 //子表单数据
 //子表表格配置
 export const prdReportDetailColumns: JVxeColumn[] = [
-    {
-      title: '主表ID',
-      key: 'pid',
-      type: JVxeTypes.input,
-      width:"200px",
-      placeholder: '请输入${title}',
-      defaultValue:'',
-    },
     {
       title: '员工工号',
       key: 'employeeId',

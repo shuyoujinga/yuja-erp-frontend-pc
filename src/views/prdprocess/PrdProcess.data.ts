@@ -153,6 +153,16 @@ export const prdProcessDetailColumns: JVxeColumn[] = [
     disabled: true,
   },
   {
+    title: '用工类型',
+    key: 'workType',
+    type: JVxeTypes.selectSearch,
+    dictCode: 'dict_work_type',
+    width:"100px",
+    placeholder: '请输入${title}',
+    defaultValue:'',
+    validateRules: [{required: true, message: '${title}不能为空'}],
+  },
+  {
     title: '工序单价',
     key: 'unitPrice',
     type: JVxeTypes.inputNumber,
